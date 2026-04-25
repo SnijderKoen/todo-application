@@ -1,4 +1,4 @@
-# todo
+# Todo App
 
 A local, colorful CLI todo list. Built with [Typer](https://typer.tiangolo.com/) + [Rich](https://rich.readthedocs.io/).
 
@@ -30,7 +30,7 @@ pipx install .
 ## Usage (scaffold)
 
 ```bash
-todo            # placeholder panel
+todo            # show todo app info
 todo --help     # list commands (auto-generated)
 todo --version
 ```
