@@ -34,7 +34,7 @@ class JSONStorage:
         data_dict["completed_at"] = task.completed_at.isoformat() if task.completed_at else None
         return data_dict
 
-    def load(self, filename: str) -> None:
+    def load(self, filename: str = "tasks.json") -> None:
         """Load tasks from the JSON storage file if it exists"""
         task_file = Path(filename)
         if not task_file.exists():
