@@ -57,3 +57,11 @@ class JSONStorage:
         json_tmp = self.filename.with_suffix(".tmp")
         json_tmp.write_text(json.dumps(data, indent=2))
         os.replace(json_tmp, self.filename)
+
+    def delete_task(self, task_id: int) -> bool:
+        """Delete a task by its ID. Returns True if deleted, False if not found."""
+        for i, task in enumerate(self.tasks):
+            if task.id == task_id:
+                del self.tasks[i]
+                return True
+        return False
