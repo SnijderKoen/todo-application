@@ -7,10 +7,12 @@ exposes `--version`. Subcommands (add/edit/done/list/show/label) land in M3+.
 from __future__ import annotations
 
 import typer
-from rich.console import Console
 from rich.panel import Panel
 
 from todo_app import __version__
+from todo_app.commands.add import add_cmd
+from todo_app.commands.delete import delete_cmd
+from todo_app.console import console
 
 app = typer.Typer(
     name="todo",
@@ -20,7 +22,9 @@ app = typer.Typer(
     add_completion=True,
 )
 
-console = Console()
+# Register subcommands.
+app.command("add")(add_cmd)
+app.command("delete")(delete_cmd)
 
 
 def _version_callback(value: bool) -> None:
