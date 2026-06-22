@@ -20,7 +20,7 @@ def add_cmd(
     console.print(f"Added task [green]{task.title}[/green] with ID [cyan]{task.id}[/cyan].")
 
 
-def add_label(
+def add_label_cmd(
     args: tuple[int, str] = typer.Argument(
         ...,
         help="The ID of the task to add the label to and the label to add to the task",

@@ -10,7 +10,7 @@ import typer
 from rich.panel import Panel
 
 from todo_app import __version__
-from todo_app.commands.add import add_cmd, add_label
+from todo_app.commands.add import add_cmd, add_label_cmd
 from todo_app.commands.delete import delete_cmd
 from todo_app.console import console
 
@@ -25,7 +25,7 @@ app = typer.Typer(
 # Register subcommands.
 app.command("add")(add_cmd)
 app.command("delete")(delete_cmd)
-app.command("label")(add_label)
+app.command("label")(add_label_cmd)
 
 
 def _version_callback(value: bool) -> None:
