@@ -1,10 +1,10 @@
 import json
 import os
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
 
 from tasks.task import Task
-from pathlib import Path
-from datetime import datetime
-from dataclasses import dataclass, field, asdict
 
 
 @dataclass
@@ -15,7 +15,7 @@ class JSONStorage:
     tasks: list[Task] = field(default_factory=list)
 
     def _get_task_from_dict(self, data: dict) -> Task:
-        """Convert a dictionary to a Task instance."""
+        """Convert a dictionary to a Task instance"""
         return Task(
             id=data["id"],
             title=data["title"],
@@ -28,7 +28,7 @@ class JSONStorage:
         )
 
     def _get_dict_from_task(self, task: Task) -> dict:
-        """Convert a Task instance to a dictionary."""
+        """Convert a Task instance to a dictionary"""
         data_dict = asdict(task)
         data_dict["created"] = task.created.isoformat()
         data_dict["completed_at"] = task.completed_at.isoformat() if task.completed_at else None
@@ -48,7 +48,7 @@ class JSONStorage:
             self.tasks = [self._get_task_from_dict(task) for task in data["tasks"]]
 
     def save(self) -> None:
-        """Save tasks to the JSON storage file."""
+        """Save tasks to the JSON storage file"""
         data = {
             "next_id": self.next_id,
             "version": self.version,
@@ -59,9 +59,23 @@ class JSONStorage:
         os.replace(json_tmp, self.filename)
 
     def delete_task(self, task_id: int) -> bool:
-        """Delete a task by its ID. Returns True if deleted, False if not found."""
+        """
+        Delete a task by its ID
+        Returns True if deleted, False if the task was not found
+        """
         for i, task in enumerate(self.tasks):
             if task.id == task_id:
                 del self.tasks[i]
+                return True
+        return False
+
+    def add_label(self, label: str, task_id: int) -> bool:
+        """
+        Add a label to a task by its ID
+        Returns True if label was added, False if the task was not found
+        """
+        for task in self.tasks:
+            if task.id == task_id:
+                task.labels.append(label)
                 return True
         return False

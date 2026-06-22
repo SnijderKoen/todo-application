@@ -1,11 +1,12 @@
-from todo_app.console import console
-from tasks.storage import JSONStorage
-from tasks.task import Task
 import typer
 
-def delete_cmd(task_id: int = typer.Argument
-               (..., help="The ID of the task to delete", metavar="TASK_ID")
-               ) -> None:
+from tasks.storage import JSONStorage
+from todo_app.console import console
+
+
+def delete_cmd(
+    task_id: int = typer.Argument(..., help="The ID of the task to delete", metavar="TASK_ID"),
+) -> None:
     """Delete a task with the given ID"""
     storage = JSONStorage()
     storage.load()
