@@ -79,3 +79,21 @@ class JSONStorage:
                 task.labels.append(label)
                 return True
         return False
+    
+    def delete_label(self, label: str, task_id: int) -> int:
+        """
+        Remove a label from a task by its ID
+        Returns 0 if label was removed, 1 if the task was not found, 2 if the label was not found
+        """
+        task_found = False
+        for i, task in enumerate(self.tasks):
+            if task.id == task_id:
+                task_found = True
+                for j, lab in enumerate(task.labels):
+                    if lab == label:
+                        del self.tasks[i].labels[j]
+                        return 0
+        if task_found:
+            return 2
+        else:
+            return 1

@@ -92,3 +92,75 @@ def test_delete_requires_id(isolated_cwd: Path) -> None:
 
     assert result.exit_code != 0
     assert "TASK_ID" in result.output or "Missing argument" in result.output
+
+
+# --------------------------------------------------------------------------- #
+# label_del command
+# --------------------------------------------------------------------------- #
+
+
+def test_label_del_removes_label(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha", "beta"])
+    # Add two labels to task 1
+    runner.invoke(app, ["label", "1", "urgent"])
+    runner.invoke(app, ["label", "1", "work"])
+
+    result = runner.invoke(app, ["label_del", "1", "urgent"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["labels"] == ["work"]
+
+
+def test_label_del_prints_confirmation(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha"])
+    runner.invoke(app, ["label", "1", "urgent"])
+
+    result = runner.invoke(app, ["label_del", "1", "urgent"])
+
+    assert result.exit_code == 0
+    assert "urgent" in result.output
+    assert "1" in result.output
+    assert "Deleted" in result.output
+
+
+def test_label_del_missing_task_reports_not_found(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha"])
+
+    result = runner.invoke(app, ["label_del", "999", "urgent"])
+
+    assert result.exit_code == 0
+    assert "999" in result.output
+    assert "No task" in result.output
+
+    # The existing task must still be there.
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert len(data["tasks"]) == 1
+
+
+def test_label_del_missing_label_reports_not_found(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha"])
+
+    result = runner.invoke(app, ["label_del", "1", "nonexistent"])
+
+    assert result.exit_code == 0
+    assert "nonexistent" in result.output
+    assert "No label" in result.output
+
+    # Task must still be there with no labels.
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert len(data["tasks"]) == 1
+
+
+def test_label_del_requires_args(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["label_del"])
+
+    assert result.exit_code != 0
+    assert "TASK_ID" in result.output and "LABEL" in result.output
+
+
+def test_label_del_requires_both_args(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["label_del", "1"])
+
+    assert result.exit_code != 0
+    assert "args" in result.output
