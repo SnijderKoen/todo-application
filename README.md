@@ -35,15 +35,6 @@ todo --help     # list commands (auto-generated)
 todo --version
 ```
 
-## Optional alias
-
-You mentioned wanting a separate "edit" command. When `todo edit` lands in M5, add this to your shell rc:
-
-```bash
-alias todo-edit='todo edit'
-```
-
-
 ## Dev
 
 ```bash

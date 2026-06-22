@@ -16,7 +16,6 @@ import pytest
 from tasks.storage import JSONStorage
 from tasks.task import Task
 
-
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
@@ -284,3 +283,74 @@ def test_save_overwrites_existing_file(storage_path: Path) -> None:
     assert data["next_id"] == 2
     assert len(data["tasks"]) == 1
     assert data["tasks"][0]["title"] == "only one"
+
+
+# --------------------------------------------------------------------------- #
+# add_label()
+# --------------------------------------------------------------------------- #
+
+
+def test_add_label(storage_path: Path) -> None:
+    task = make_task(task_id=3, title="task", labels=[])
+    storage = JSONStorage(filename=storage_path, next_id=4, version=69, tasks=[task])
+    label_added = storage.add_label("label", 3)
+    storage.save()
+
+    data = json.loads(storage_path.read_text())
+    assert label_added 
+    assert data["next_id"] == 4
+    assert data["tasks"][0]["labels"] == ["label"]
+
+
+def test_add_label_task_doesnot_exist(storage_path: Path) -> None:
+    task = make_task(task_id=3, title="task", labels=[])
+    storage = JSONStorage(filename=storage_path, next_id=4, version=69, tasks=[task])
+    label_added = storage.add_label("label", 4)
+    storage.save()
+
+    data = json.loads(storage_path.read_text())
+    assert not label_added
+    assert data["next_id"] == 4
+    assert data["tasks"][0]["title"] == "task"
+    assert data["tasks"][0]["labels"] == []
+
+
+# --------------------------------------------------------------------------- #
+# delete_label()
+# --------------------------------------------------------------------------- #
+
+
+def test_delete_label(storage_path: Path) -> None:
+    task = make_task(task_id=3, title="task", labels=["label", "other"])
+    storage = JSONStorage(filename=storage_path, next_id=4, version=69, tasks=[task])
+    result = storage.delete_label("label", 3)
+    storage.save()
+
+    data = json.loads(storage_path.read_text())
+    assert result == 0
+    assert data["next_id"] == 4
+    assert data["tasks"][0]["labels"] == ["other"]
+
+
+def test_delete_label_task_doesnot_exist(storage_path: Path) -> None:
+    task = make_task(task_id=3, title="task", labels=["label"])
+    storage = JSONStorage(filename=storage_path, next_id=4, version=69, tasks=[task])
+    result = storage.delete_label("label", 4)
+    storage.save()
+
+    data = json.loads(storage_path.read_text())
+    assert result == 1
+    assert data["next_id"] == 4
+    assert data["tasks"][0]["labels"] == ["label"]
+
+
+def test_delete_label_label_doesnot_exist(storage_path: Path) -> None:
+    task = make_task(task_id=3, title="task", labels=["label"])
+    storage = JSONStorage(filename=storage_path, next_id=4, version=69, tasks=[task])
+    result = storage.delete_label("nonexistent", 3)
+    storage.save()
+
+    data = json.loads(storage_path.read_text())
+    assert result == 2
+    assert data["next_id"] == 4
+    assert data["tasks"][0]["labels"] == ["label"]

@@ -18,6 +18,12 @@ from todo_app.cli import app
 runner = CliRunner()
 
 
+def create_tasks() -> None:
+    """Helper function to create some tasks"""
+    runner.invoke(app, ["add", "da big test"])
+    runner.invoke(app, ["add", "biepboep"])
+
+
 @pytest.fixture
 def isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Run the test with the CWD set to a fresh temp dir."""
@@ -79,3 +85,39 @@ def test_add_help_lists_title_argument() -> None:
 
     assert result.exit_code == 0
     assert "title" in result.output.lower()
+
+
+def test_label_add_requires_two_args(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["label"])
+
+    assert result.exit_code != 0
+    assert (
+        "TASK_ID" in result.output
+        and "LABEL" in result.output
+        and "Missing argument" in result.output
+    )
+
+
+def test_label_add_requires_label(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["label", "1"])
+
+    assert result.exit_code != 0
+    assert "args" in result.output
+
+
+def test_label_add(isolated_cwd: Path) -> None:
+    create_tasks()
+
+    result = runner.invoke(app, ["label", "1", "test_task"])
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+
+    assert result.exit_code == 0
+    assert data["tasks"][0]["labels"] == ["test_task"]
+
+
+def test_label_add_non_existant_task(isolated_cwd: Path) -> None:
+    create_tasks()
+
+    result = runner.invoke(app, ["label", "5", "some cool label"])
+    assert result.exit_code == 0
+    assert "No task found with ID 5" in result.output
