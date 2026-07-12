@@ -2,6 +2,7 @@ import json
 import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from tasks.task import Task
@@ -12,6 +13,7 @@ class JSONStorage:
     filename: Path = Path()
     next_id: int = 1
     version: int = 1
+    auto_remove_days: int = 10
     tasks: list[Task] = field(default_factory=list)
 
     def _get_task_from_dict(self, data: dict) -> Task:
@@ -35,7 +37,10 @@ class JSONStorage:
         return data_dict
 
     def load(self, filename: str = "tasks.json") -> None:
-        """Load tasks from the JSON storage file if it exists"""
+        """
+        Load tasks from the JSON storage file if it exists
+        After loading, check if any tasks that were completed longer ago then auto_remove_days, remove the task
+        """
         task_file = Path(filename)
         if not task_file.exists():
             self.filename = Path(filename)
@@ -46,6 +51,12 @@ class JSONStorage:
             self.next_id = data["next_id"]
             self.version = data["version"]
             self.tasks = [self._get_task_from_dict(task) for task in data["tasks"]]
+
+            today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+            for task in self.tasks[:]:
+                if task.completed and task.completed_at is not None and (today - task.completed_at).days > self.auto_remove_days:
+                    self.delete_task(task.id)
+
 
     def save(self) -> None:
         """Save tasks to the JSON storage file"""
@@ -76,7 +87,7 @@ class JSONStorage:
         """
         for task in self.tasks:
             if task.id == task_id:
-                task.labels.append(label)
+                task.add_label(label)
                 return True
         return False
     
@@ -85,15 +96,33 @@ class JSONStorage:
         Remove a label from a task by its ID
         Returns 0 if label was removed, 1 if the task was not found, 2 if the label was not found
         """
-        task_found = False
-        for i, task in enumerate(self.tasks):
+        status = 1
+        for task in self.tasks:
             if task.id == task_id:
-                task_found = True
-                for j, lab in enumerate(task.labels):
-                    if lab == label:
-                        del self.tasks[i].labels[j]
-                        return 0
-        if task_found:
-            return 2
-        else:
-            return 1
+                status = task.delete_label(label)
+
+        return status
+    
+    def complete_task(self, task_id: int) -> bool:
+        """
+        Complete a task if it exists and return True
+        If the task does not exist, return False
+        """
+        for task in self.tasks:
+            if task.id == task_id:
+                task.complete_task()
+                return True
+            
+        return False
+    
+    def uncomplete_task(self, task_id: int) -> bool:
+        """
+        Uncomplete a task if it exists and return True
+        If the task does not exist, return False
+        """
+        for task in self.tasks:
+            if task.id == task_id:
+                task.uncomplete_task()
+                return True
+            
+        return False
