@@ -91,3 +91,15 @@ class JSONStorage:
                 status = task.delete_label(label)
 
         return status
+    
+    def complete_task(self, task_id: int) -> bool:
+        """
+        Complete a task if it exists and return True
+        If the task does not exist, return False
+        """
+        for task in self.tasks:
+            if task.id == task_id:
+                task.complete_task()
+                return True
+            
+        return False
