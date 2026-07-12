@@ -103,3 +103,15 @@ class JSONStorage:
                 return True
             
         return False
+    
+    def uncomplete_task(self, task_id: int) -> bool:
+        """
+        Uncomplete a task if it exists and return True
+        If the task does not exist, return False
+        """
+        for task in self.tasks:
+            if task.id == task_id:
+                task.uncomplete_task()
+                return True
+            
+        return False

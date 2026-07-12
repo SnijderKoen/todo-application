@@ -35,3 +35,9 @@ class Task:
         """Complete a task at the current time"""
         self.completed = True
         self.completed_at = datetime.now(ZoneInfo("Europe/Amsterdam"))
+
+
+    def uncomplete_task(self) -> None:
+        """Uncomplete a task and reset completed at"""
+        self.completed = False
+        self.completed_at = None
