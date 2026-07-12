@@ -155,6 +155,9 @@ def test_load_missing_file_leaves_defaults(storage_path: Path) -> None:
 
 
 def test_load_reads_existing_file(storage_path: Path) -> None:
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("Europe/Amsterdam")
     payload = {
         "next_id": 5,
         "version": 1,
@@ -163,7 +166,7 @@ def test_load_reads_existing_file(storage_path: Path) -> None:
                 "id": 1,
                 "title": "write report",
                 "labels": ["work"],
-                "created": datetime(2026, 4, 19, 9, 0, 0).isoformat(),
+                "created": datetime(2026, 4, 19, 9, 0, 0, tzinfo=tz).isoformat(),
                 "completed": False,
                 "completed_at": None,
             },
@@ -171,9 +174,9 @@ def test_load_reads_existing_file(storage_path: Path) -> None:
                 "id": 4,
                 "title": "ship release",
                 "labels": ["work", "urgent"],
-                "created": datetime(2026, 4, 18, 10, 0, 0).isoformat(),
+                "created": datetime(2026, 4, 18, 10, 0, 0, tzinfo=tz).isoformat(),
                 "completed": True,
-                "completed_at": datetime(2026, 4, 19, 16, 30, 0).isoformat(),
+                "completed_at": datetime(2026, 4, 19, 16, 30, 0, tzinfo=tz).isoformat(),
             },
         ],
     }
@@ -184,19 +187,17 @@ def test_load_reads_existing_file(storage_path: Path) -> None:
 
     assert storage.next_id == 5
     assert storage.version == 1
-    assert len(storage.tasks) == 2
+    # The completed task ("ship release") is from 2026 and older than the
+    # default ``auto_remove_days`` (10), so it is pruned on load.
+    assert len(storage.tasks) == 1
 
-    first, second = storage.tasks
+    first = storage.tasks[0]
     assert first.id == 1
     assert first.title == "write report"
     assert first.labels == ["work"]
     assert first.completed is False
     assert first.completed_at is None
-    assert first.created == datetime(2026, 4, 19, 9, 0, 0)
-
-    assert second.id == 4
-    assert second.completed is True
-    assert second.completed_at == datetime(2026, 4, 19, 16, 30, 0)
+    assert first.created == datetime(2026, 4, 19, 9, 0, 0, tzinfo=tz)
 
 
 def test_load_empty_task_list(storage_path: Path) -> None:
@@ -247,6 +248,9 @@ def test_save_removes_tmp_file(storage_path: Path) -> None:
 
 def test_save_then_load_roundtrip(storage_path: Path) -> None:
     """Writing via save() and reading back via load() preserves all data."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
     tasks = [
         make_task(task_id=1, title="first", labels=["a"]),
         make_task(
@@ -254,13 +258,13 @@ def test_save_then_load_roundtrip(storage_path: Path) -> None:
             title="second",
             labels=["b", "c"],
             completed=True,
-            completed_at=datetime(2026, 4, 19, 18, 0, 0),
+            completed_at=today,
         ),
     ]
     writer = JSONStorage(filename=storage_path, next_id=3, version=1, tasks=list(tasks))
     writer.save()
 
-    reader = JSONStorage()
+    reader = JSONStorage(auto_remove_days=0)
     reader.load(str(storage_path))
 
     assert reader.next_id == 3
@@ -354,3 +358,231 @@ def test_delete_label_label_doesnot_exist(storage_path: Path) -> None:
     assert result == 2
     assert data["next_id"] == 4
     assert data["tasks"][0]["labels"] == ["label"]
+
+
+# --------------------------------------------------------------------------- #
+# load() auto-remove of stale completed tasks
+# --------------------------------------------------------------------------- #
+
+
+def test_load_removes_completed_task_older_than_auto_remove_days(
+    storage_path: Path,
+) -> None:
+    """A completed task older than ``auto_remove_days`` days should be removed on load."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    old_completed_at = today.replace(year=today.year - 1)  # ~365 days ago
+
+    payload = {
+        "next_id": 3,
+        "version": 1,
+        "tasks": [
+            {
+                "id": 1,
+                "title": "ancient task",
+                "labels": [],
+                "created": old_completed_at.isoformat(),
+                "completed": True,
+                "completed_at": old_completed_at.isoformat(),
+            },
+            {
+                "id": 2,
+                "title": "recent incomplete",
+                "labels": [],
+                "created": today.isoformat(),
+                "completed": False,
+                "completed_at": None,
+            },
+        ],
+    }
+    storage_path.write_text(json.dumps(payload))
+
+    storage = JSONStorage(auto_remove_days=10)
+    storage.load(str(storage_path))
+
+    assert len(storage.tasks) == 1
+    assert storage.tasks[0].id == 2
+    assert storage.tasks[0].title == "recent incomplete"
+
+
+def test_load_keeps_completed_task_within_auto_remove_days(
+    storage_path: Path,
+) -> None:
+    """A completed task *within* ``auto_remove_days`` must NOT be removed."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    # Task was completed *yesterday* — well within the default 10-day window.
+    yesterday = today.replace(day=today.day - 1) if today.day > 1 else today
+
+    payload = {
+        "next_id": 2,
+        "version": 1,
+        "tasks": [
+            {
+                "id": 1,
+                "title": "just finished",
+                "labels": [],
+                "created": yesterday.isoformat(),
+                "completed": True,
+                "completed_at": yesterday.isoformat(),
+            },
+        ],
+    }
+    storage_path.write_text(json.dumps(payload))
+
+    storage = JSONStorage(auto_remove_days=10)
+    storage.load(str(storage_path))
+
+    assert len(storage.tasks) == 1
+    assert storage.tasks[0].id == 1
+    assert storage.tasks[0].completed is True
+
+
+def test_load_never_removes_uncompleted_tasks(storage_path: Path) -> None:
+    """Uncompleted tasks are never removed regardless of their creation date."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    very_old = today.replace(year=today.year - 5)  # 5 years old
+
+    payload = {
+        "next_id": 2,
+        "version": 1,
+        "tasks": [
+            {
+                "id": 1,
+                "title": "forgotten task",
+                "labels": [],
+                "created": very_old.isoformat(),
+                "completed": False,
+                "completed_at": None,
+            },
+        ],
+    }
+    storage_path.write_text(json.dumps(payload))
+
+    storage = JSONStorage(auto_remove_days=10)
+    storage.load(str(storage_path))
+
+    assert len(storage.tasks) == 1
+    assert storage.tasks[0].id == 1
+
+
+def test_load_respects_custom_auto_remove_days(storage_path: Path) -> None:
+    """When ``auto_remove_days`` is lowered, tasks should be pruned earlier."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    # Task completed 5 days ago — should survive with default 10, but be
+    # removed with auto_remove_days=3.
+    five_days_ago = today.replace(day=today.day - 5) if today.day > 5 else today
+
+    payload = {
+        "next_id": 2,
+        "version": 1,
+        "tasks": [
+            {
+                "id": 1,
+                "title": "stale",
+                "labels": [],
+                "created": five_days_ago.isoformat(),
+                "completed": True,
+                "completed_at": five_days_ago.isoformat(),
+            },
+        ],
+    }
+    storage_path.write_text(json.dumps(payload))
+
+    storage = JSONStorage(auto_remove_days=3)
+    storage.load(str(storage_path))
+
+    assert len(storage.tasks) == 0
+
+
+def test_load_save_roundtrip_excludes_removed_tasks(storage_path: Path) -> None:
+    """After load removes stale tasks, save() must not write them back."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    old_completed_at = today.replace(year=today.year - 1)
+
+    payload = {
+        "next_id": 5,
+        "version": 1,
+        "tasks": [
+            {
+                "id": 1,
+                "title": "old done",
+                "labels": [],
+                "created": old_completed_at.isoformat(),
+                "completed": True,
+                "completed_at": old_completed_at.isoformat(),
+            },
+            {
+                "id": 4,
+                "title": "current",
+                "labels": [],
+                "created": today.isoformat(),
+                "completed": False,
+                "completed_at": None,
+            },
+        ],
+    }
+    storage_path.write_text(json.dumps(payload))
+
+    storage = JSONStorage(auto_remove_days=10)
+    storage.load(str(storage_path))
+    storage.save()
+
+    data = json.loads(storage_path.read_text())
+    assert len(data["tasks"]) == 1
+    assert data["tasks"][0]["id"] == 4
+    assert data["tasks"][0]["title"] == "current"
+
+
+def test_load_removes_multiple_stale_tasks(storage_path: Path) -> None:
+    """All stale completed tasks should be removed, not just the first."""
+    from zoneinfo import ZoneInfo
+
+    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    old = today.replace(year=today.year - 2)
+
+    payload = {
+        "next_id": 5,
+        "version": 1,
+        "tasks": [
+            {
+                "id": 1,
+                "title": "stale 1",
+                "labels": [],
+                "created": old.isoformat(),
+                "completed": True,
+                "completed_at": old.isoformat(),
+            },
+            {
+                "id": 2,
+                "title": "stale 2",
+                "labels": [],
+                "created": old.isoformat(),
+                "completed": True,
+                "completed_at": old.isoformat(),
+            },
+            {
+                "id": 3,
+                "title": "fresh",
+                "labels": [],
+                "created": today.isoformat(),
+                "completed": False,
+                "completed_at": None,
+            },
+        ],
+    }
+    storage_path.write_text(json.dumps(payload))
+
+    storage = JSONStorage(auto_remove_days=10)
+    storage.load(str(storage_path))
+
+    assert len(storage.tasks) == 1
+    assert storage.tasks[0].id == 3

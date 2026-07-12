@@ -2,6 +2,7 @@ import json
 import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from tasks.task import Task
@@ -12,6 +13,7 @@ class JSONStorage:
     filename: Path = Path()
     next_id: int = 1
     version: int = 1
+    auto_remove_days: int = 10
     tasks: list[Task] = field(default_factory=list)
 
     def _get_task_from_dict(self, data: dict) -> Task:
@@ -35,7 +37,10 @@ class JSONStorage:
         return data_dict
 
     def load(self, filename: str = "tasks.json") -> None:
-        """Load tasks from the JSON storage file if it exists"""
+        """
+        Load tasks from the JSON storage file if it exists
+        After loading, check if any tasks that were completed longer ago then auto_remove_days, remove the task
+        """
         task_file = Path(filename)
         if not task_file.exists():
             self.filename = Path(filename)
@@ -46,6 +51,12 @@ class JSONStorage:
             self.next_id = data["next_id"]
             self.version = data["version"]
             self.tasks = [self._get_task_from_dict(task) for task in data["tasks"]]
+
+            today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+            for task in self.tasks[:]:
+                if task.completed and task.completed_at is not None and (today - task.completed_at).days > self.auto_remove_days:
+                    self.delete_task(task.id)
+
 
     def save(self) -> None:
         """Save tasks to the JSON storage file"""
