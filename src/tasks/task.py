@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 @dataclass
@@ -16,6 +17,7 @@ class Task:
         """Add a label to the task"""
         self.labels.append(label)
 
+
     def delete_label(self, label: str) -> int:
         """
         Remove a label if it exists
@@ -27,3 +29,9 @@ class Task:
                 return 0
             
         return 2
+    
+
+    def complete_task(self) -> None:
+        """Complete a task at the current time"""
+        self.completed = True
+        self.completed_at = datetime.now(ZoneInfo("Europe/Amsterdam"))
