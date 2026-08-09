@@ -1,9 +1,3 @@
-"""Typer app entry point.
-
-M1 scaffold: the `todo` command exists, prints a friendly placeholder, and
-exposes `--version`. Subcommands (add/edit/done/list/show/label) land in M3+.
-"""
-
 from __future__ import annotations
 
 import typer

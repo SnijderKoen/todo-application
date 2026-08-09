@@ -1,4 +1,5 @@
-"""Tests for the `todo add` command.
+"""
+Tests for the `todo add` command.
 
 Each test runs inside a fresh temporary working directory so that the
 hardcoded ``tasks.json`` path used by the command writes into a sandbox

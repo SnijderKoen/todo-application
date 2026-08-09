@@ -1,4 +1,5 @@
-"""Tests for the `todo delete` command.
+"""
+Tests for the `todo delete` command.
 
 These tests assume ``JSONStorage`` exposes a ``delete_task(task_id)``
 method that returns ``True`` on success and ``False`` if no such task
