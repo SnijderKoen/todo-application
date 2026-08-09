@@ -1,4 +1,5 @@
-"""Tests for the `todo add` command.
+"""
+Tests for the `todo add` command.
 
 Each test runs inside a fresh temporary working directory so that the
 hardcoded ``tasks.json`` path used by the command writes into a sandbox
@@ -121,3 +122,55 @@ def test_label_add_non_existant_task(isolated_cwd: Path) -> None:
     result = runner.invoke(app, ["label", "5", "some cool label"])
     assert result.exit_code == 0
     assert "No task found with ID 5" in result.output
+
+
+# --------------------------------------------------------------------------- #
+# deadline command
+# --------------------------------------------------------------------------- #
+
+
+def test_deadline_adds_deadline_to_task(isolated_cwd: Path) -> None:
+    create_tasks()
+
+    result = runner.invoke(app, ["deadline", "1", "31-12-2026"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["deadline"] is not None
+    assert "2026-12-31" in data["tasks"][0]["deadline"]
+
+
+def test_deadline_prints_confirmation(isolated_cwd: Path) -> None:
+    create_tasks()
+
+    result = runner.invoke(app, ["deadline", "1", "15-08-2026"])
+
+    assert result.exit_code == 0
+    assert "15-08-2026" in result.output
+    assert "1" in result.output
+    assert "Successfully added" in result.output
+
+
+def test_deadline_rejects_bad_format(isolated_cwd: Path) -> None:
+    create_tasks()
+
+    result = runner.invoke(app, ["deadline", "1", "2026-12-31"])
+
+    assert result.exit_code == 0
+    assert "dd-mm-yyyy" in result.output
+
+
+def test_deadline_missing_task_reports_not_found(isolated_cwd: Path) -> None:
+    create_tasks()
+
+    result = runner.invoke(app, ["deadline", "999", "31-12-2026"])
+
+    assert result.exit_code == 0
+    assert "No task found with ID 999" in result.output
+
+
+def test_deadline_requires_args(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["deadline"])
+
+    assert result.exit_code != 0
+    assert "TASK_ID" in result.output and "DEADLINE" in result.output

@@ -1,4 +1,5 @@
-"""Tests for the `todo delete` command.
+"""
+Tests for the `todo delete` command.
 
 These tests assume ``JSONStorage`` exposes a ``delete_task(task_id)``
 method that returns ``True`` on success and ``False`` if no such task
@@ -164,3 +165,48 @@ def test_label_del_requires_both_args(isolated_cwd: Path) -> None:
 
     assert result.exit_code != 0
     assert "args" in result.output
+
+
+# --------------------------------------------------------------------------- #
+# deadline_del command
+# --------------------------------------------------------------------------- #
+
+
+def test_deadline_del_removes_deadline(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha"])
+    runner.invoke(app, ["deadline", "1", "31-12-2026"])
+
+    result = runner.invoke(app, ["deadline_del", "1"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["deadline"] is None
+
+
+def test_deadline_del_prints_confirmation(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha"])
+    runner.invoke(app, ["deadline", "1", "31-12-2026"])
+
+    result = runner.invoke(app, ["deadline_del", "1"])
+
+    assert result.exit_code == 0
+    assert "1" in result.output
+    assert "Deleted" in result.output
+    assert "deadline" in result.output.lower()
+
+
+def test_deadline_del_missing_task_reports_not_found(isolated_cwd: Path) -> None:
+    _seed(isolated_cwd, ["alpha"])
+
+    result = runner.invoke(app, ["deadline_del", "999"])
+
+    assert result.exit_code == 0
+    assert "999" in result.output
+    assert "No task" in result.output
+
+
+def test_deadline_del_requires_id(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["deadline_del"])
+
+    assert result.exit_code != 0
+    assert "TASK_ID" in result.output or "Missing argument" in result.output

@@ -11,6 +11,7 @@ class Task:
     created: datetime = field(default_factory=datetime.now)
     completed: bool = False
     completed_at: datetime | None = None
+    deadline: datetime | None = None
 
 
     def add_label(self, label: str) -> None:
@@ -41,3 +42,13 @@ class Task:
         """Uncomplete a task and reset completed at"""
         self.completed = False
         self.completed_at = None
+
+
+    def add_deadline(self, deadline: datetime) -> None:
+        """Add a deadline to a task"""
+        self.deadline = deadline
+
+
+    def remove_deadline(self) -> None:
+        """Remove a deadline from a task"""
+        self.deadline = None
