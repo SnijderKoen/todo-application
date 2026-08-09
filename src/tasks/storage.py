@@ -27,6 +27,9 @@ class JSONStorage:
             completed_at=datetime.fromisoformat(data["completed_at"])
             if data["completed_at"]
             else None,
+            deadline=datetime.fromisoformat(data["deadline"])
+            if data["deadline"] is not None
+            else None,
         )
 
     def _get_dict_from_task(self, task: Task) -> dict:
@@ -34,6 +37,7 @@ class JSONStorage:
         data_dict = asdict(task)
         data_dict["created"] = task.created.isoformat()
         data_dict["completed_at"] = task.completed_at.isoformat() if task.completed_at else None
+        data_dict["deadline"] = task.deadline.isoformat if task.deadline is not None else None
         return data_dict
 
     def load(self, filename: str = "tasks.json") -> None:
@@ -126,3 +130,29 @@ class JSONStorage:
                 return True
             
         return False
+
+
+    def add_deadline(self, task_id: int, deadline: datetime) -> bool:
+        """
+        Add a deadline to a task with task_id and return True
+        If the task does not exist, return False
+        """
+        for task in self.tasks:
+            if task.id == task_id:
+                task.add_deadline(deadline)
+                return True
+
+        return False
+
+
+    def remove_deadline(self, task_id: int) -> bool:
+            """
+            Remove a deadline from a task with task_id and return True
+            If the task does not exist, return False
+            """
+            for task in self.tasks:
+                if task.id == task_id:
+                    task.remove_deadline()
+                    return True
+    
+            return False

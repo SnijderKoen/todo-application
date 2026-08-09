@@ -34,3 +34,22 @@ def delete_label_cmd(args: tuple[int, str] = typer.Argument
         console.print(f"No task found with ID [red]{task_id}[/red].")
     else:
         console.print(f"No label: [red]{label}[/red] found for task with ID [medium_purple1]{task_id}[/medium_purple1]")
+
+
+def delete_deadline_cmd(
+        task_id: int = typer.Argument(
+            ...,
+            help="The ID of the task to remove the deadline from",
+            metavar="TASK_ID"
+        ),
+) -> None:
+    """Remove the deadline fromt the task with the given ID"""
+    storage = JSONStorage()
+    storage.load()
+
+    if storage.remove_deadline():
+        console.print(f"Deleted deadline from task with ID [medium_purple1]{task_id}[/medium_purple1]")
+        storage.save()
+    else:
+        console.print(f"No task found with ID [red]{task_id}[/red].")
+   
