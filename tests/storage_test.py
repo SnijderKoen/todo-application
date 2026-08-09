@@ -28,6 +28,7 @@ def make_task(
     completed: bool = False,
     completed_at: datetime | None = None,
     created: datetime | None = None,
+    deadline: datetime | None = None,
 ) -> Task:
     """Construct a Task with sensible defaults for tests."""
     return Task(
@@ -37,6 +38,7 @@ def make_task(
         created=created or datetime(2026, 4, 19, 12, 0, 0),
         completed=completed,
         completed_at=completed_at,
+        deadline=deadline,
     )
 
 
@@ -73,6 +75,7 @@ def test_get_dict_from_task_serializes_datetime_to_iso() -> None:
         "created": created.isoformat(),
         "completed": True,
         "completed_at": completed_at.isoformat(),
+        "deadline": None,
     }
 
 
@@ -111,6 +114,7 @@ def test_get_task_from_dict_handles_missing_labels() -> None:
         "created": datetime(2026, 4, 19).isoformat(),
         "completed": False,
         "completed_at": None,
+        "deadline": None,
     }
 
     task = storage._get_task_from_dict(data)
@@ -127,6 +131,7 @@ def test_get_task_from_dict_none_completed_at_stays_none() -> None:
         "created": datetime(2026, 4, 19).isoformat(),
         "completed": False,
         "completed_at": None,
+        "deadline": None,
     }
 
     task = storage._get_task_from_dict(data)
@@ -169,6 +174,7 @@ def test_load_reads_existing_file(storage_path: Path) -> None:
                 "created": datetime(2026, 4, 19, 9, 0, 0, tzinfo=tz).isoformat(),
                 "completed": False,
                 "completed_at": None,
+                "deadline": None,
             },
             {
                 "id": 4,
@@ -177,6 +183,7 @@ def test_load_reads_existing_file(storage_path: Path) -> None:
                 "created": datetime(2026, 4, 18, 10, 0, 0, tzinfo=tz).isoformat(),
                 "completed": True,
                 "completed_at": datetime(2026, 4, 19, 16, 30, 0, tzinfo=tz).isoformat(),
+                "deadline": None,
             },
         ],
     }
@@ -385,6 +392,7 @@ def test_load_removes_completed_task_older_than_auto_remove_days(
                 "created": old_completed_at.isoformat(),
                 "completed": True,
                 "completed_at": old_completed_at.isoformat(),
+                "deadline": None,
             },
             {
                 "id": 2,
@@ -393,6 +401,7 @@ def test_load_removes_completed_task_older_than_auto_remove_days(
                 "created": today.isoformat(),
                 "completed": False,
                 "completed_at": None,
+                "deadline": None,
             },
         ],
     }
@@ -427,6 +436,7 @@ def test_load_keeps_completed_task_within_auto_remove_days(
                 "created": yesterday.isoformat(),
                 "completed": True,
                 "completed_at": yesterday.isoformat(),
+                "deadline": None,
             },
         ],
     }
@@ -458,6 +468,7 @@ def test_load_never_removes_uncompleted_tasks(storage_path: Path) -> None:
                 "created": very_old.isoformat(),
                 "completed": False,
                 "completed_at": None,
+                "deadline": None,
             },
         ],
     }
@@ -490,6 +501,7 @@ def test_load_respects_custom_auto_remove_days(storage_path: Path) -> None:
                 "created": five_days_ago.isoformat(),
                 "completed": True,
                 "completed_at": five_days_ago.isoformat(),
+                "deadline": None,
             },
         ],
     }
@@ -519,6 +531,7 @@ def test_load_save_roundtrip_excludes_removed_tasks(storage_path: Path) -> None:
                 "created": old_completed_at.isoformat(),
                 "completed": True,
                 "completed_at": old_completed_at.isoformat(),
+                "deadline": None,
             },
             {
                 "id": 4,
@@ -527,6 +540,7 @@ def test_load_save_roundtrip_excludes_removed_tasks(storage_path: Path) -> None:
                 "created": today.isoformat(),
                 "completed": False,
                 "completed_at": None,
+                "deadline": None,
             },
         ],
     }
@@ -560,6 +574,7 @@ def test_load_removes_multiple_stale_tasks(storage_path: Path) -> None:
                 "created": old.isoformat(),
                 "completed": True,
                 "completed_at": old.isoformat(),
+                "deadline": None,
             },
             {
                 "id": 2,
@@ -568,6 +583,7 @@ def test_load_removes_multiple_stale_tasks(storage_path: Path) -> None:
                 "created": old.isoformat(),
                 "completed": True,
                 "completed_at": old.isoformat(),
+                "deadline": None,
             },
             {
                 "id": 3,
@@ -576,6 +592,7 @@ def test_load_removes_multiple_stale_tasks(storage_path: Path) -> None:
                 "created": today.isoformat(),
                 "completed": False,
                 "completed_at": None,
+                "deadline": None,
             },
         ],
     }
