@@ -47,7 +47,7 @@ def delete_deadline_cmd(
     storage = JSONStorage()
     storage.load()
 
-    if storage.remove_deadline():
+    if storage.remove_deadline(task_id):
         console.print(f"Deleted deadline from task with ID [medium_purple1]{task_id}[/medium_purple1]")
         storage.save()
     else:

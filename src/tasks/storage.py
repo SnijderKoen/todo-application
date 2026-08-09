@@ -2,8 +2,8 @@ import json
 import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from tasks.task import Task
 
@@ -37,7 +37,7 @@ class JSONStorage:
         data_dict = asdict(task)
         data_dict["created"] = task.created.isoformat()
         data_dict["completed_at"] = task.completed_at.isoformat() if task.completed_at else None
-        data_dict["deadline"] = task.deadline.isoformat if task.deadline is not None else None
+        data_dict["deadline"] = task.deadline.isoformat() if task.deadline is not None else None
         return data_dict
 
     def load(self, filename: str = "tasks.json") -> None:

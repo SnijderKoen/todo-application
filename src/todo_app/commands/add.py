@@ -1,9 +1,10 @@
+from datetime import datetime
+
 import typer
 
 from tasks.storage import JSONStorage
 from tasks.task import Task
 from todo_app.console import console
-from datetime import datetime
 
 
 def add_cmd(
@@ -65,7 +66,7 @@ def add_deadline_cmd(
 
     if storage.add_deadline(task_id, date_obj):
         console.print(
-            f"Succesfully added deadline: [green1]{date_str}[/green1] \
+            f"Successfully added deadline: [green1]{date_str}[/green1] \
             to task with ID [medium_purple1]{task_id}[/medium_purple1]"
         )
         storage.save()
