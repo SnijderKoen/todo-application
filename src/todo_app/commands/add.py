@@ -59,7 +59,7 @@ def add_deadline_cmd(
     date_str = args[1]
 
     try:
-        date_obj = datetime.strptime(date_str, "%d-%m-%Y")
+        date_obj = datetime.strptime(date_str, "%d-%m-%Y").date()
     except ValueError:
         console.print("[red]Please add a deadline in the format dd-mm-yyyy[/red].")
         return
