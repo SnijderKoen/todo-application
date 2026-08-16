@@ -87,6 +87,12 @@ class JSONStorage:
         """
         for i, task in enumerate(self.tasks):
             if task.id == task_id:
+                for label in task.labels:
+                    label_count = next((lc for lc in self.labels if lc.label == label), None)
+                    label_count.decrement_count()
+                    if label_count.get_count() == 0:
+                        self.labels.remove(label_count)
+
                 del self.tasks[i]
                 return True
         return False

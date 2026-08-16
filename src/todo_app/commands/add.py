@@ -4,6 +4,7 @@ import typer
 
 from tasks.storage import JSONStorage
 from tasks.task import Task
+from tasks.label_count import LabelCount
 from todo_app.console import console
 
 
@@ -25,6 +26,12 @@ def add_cmd(
             return
 
     task = Task(id=storage.next_id, title=title, labels=labels, deadline=date_obj)
+    for label in labels:
+        label_count = next((lc for lc in storage.labels if lc.label == label), None)
+        if label_count is None:
+            storage.labels.append(LabelCount(label=label))
+        else:
+            label_count.increment_count()
     storage.tasks.append(task)
     storage.next_id += 1
     storage.save()
