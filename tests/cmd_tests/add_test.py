@@ -174,6 +174,36 @@ def test_add_help_lists_deadline_option() -> None:
     assert "-d" in result.output
 
 
+# --------------------------------------------------------------------------- #
+# global labels tracking (via `add`)
+# --------------------------------------------------------------------------- #
+
+
+def test_add_with_label_tracks_global_count(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "-l", "work"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["labels"] == {"work": 1}
+
+
+def test_add_with_multiple_label_flags_tracks_each_once(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "-l", "work", "--label", "urgent"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["labels"] == {"work": 1, "urgent": 1}
+
+
+def test_add_same_label_across_tasks_increments_global_count(isolated_cwd: Path) -> None:
+    runner.invoke(app, ["add", "first", "-l", "work"])
+    runner.invoke(app, ["add", "second", "--label", "work"])
+
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["labels"] == {"work": 2}
+
+
+
 def test_label_add_requires_two_args(isolated_cwd: Path) -> None:
     result = runner.invoke(app, ["label"])
 

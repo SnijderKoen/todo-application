@@ -13,11 +13,9 @@ class Task:
     completed_at: datetime | None = None
     deadline: datetime | None = None
 
-
     def add_label(self, label: str) -> None:
         """Add a label to the task"""
         self.labels.append(label)
-
 
     def delete_label(self, label: str) -> int:
         """
@@ -28,26 +26,22 @@ class Task:
             if lab == label:
                 del self.labels[j]
                 return 0
-            
+
         return 2
-    
 
     def complete_task(self) -> None:
         """Complete a task at the current time"""
         self.completed = True
         self.completed_at = datetime.now(ZoneInfo("Europe/Amsterdam"))
 
-
     def uncomplete_task(self) -> None:
         """Uncomplete a task and reset completed at"""
         self.completed = False
         self.completed_at = None
 
-
     def add_deadline(self, deadline: datetime) -> None:
         """Add a deadline to a task"""
         self.deadline = deadline
-
 
     def remove_deadline(self) -> None:
         """Remove a deadline from a task"""

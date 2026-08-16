@@ -96,6 +96,32 @@ def test_delete_requires_id(isolated_cwd: Path) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# global labels tracking (via `delete`)
+# --------------------------------------------------------------------------- #
+
+
+def test_delete_task_removes_global_label_count(isolated_cwd: Path) -> None:
+    runner.invoke(app, ["add", "alpha", "-l", "work"])
+
+    result = runner.invoke(app, ["delete", "1"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["labels"] == {}
+
+
+def test_delete_one_of_two_tasks_decrements_global_count(isolated_cwd: Path) -> None:
+    runner.invoke(app, ["add", "alpha", "-l", "work"])
+    runner.invoke(app, ["add", "beta", "-l", "work"])
+
+    runner.invoke(app, ["delete", "1"])
+
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["labels"] == {"work": 1}
+
+
+
+# --------------------------------------------------------------------------- #
 # label_del command
 # --------------------------------------------------------------------------- #
 
