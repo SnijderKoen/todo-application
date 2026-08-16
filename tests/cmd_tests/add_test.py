@@ -88,6 +88,92 @@ def test_add_help_lists_title_argument() -> None:
     assert "title" in result.output.lower()
 
 
+# --------------------------------------------------------------------------- #
+# `add` --label flag
+# --------------------------------------------------------------------------- #
+
+
+def test_add_with_single_label(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "-l", "work"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["labels"] == ["work"]
+
+
+def test_add_with_multiple_labels(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "--label", "work", "--label", "urgent"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["labels"] == ["work", "urgent"]
+
+
+def test_add_with_repeated_short_label_flag(isolated_cwd: Path) -> None:
+    result = runner.invoke(
+        app,
+        ["add", "buy milk", "-l", "work", "-l", "urgent", "-l", "email"],
+    )
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["labels"] == ["work", "urgent", "email"]
+
+
+def test_add_help_lists_label_option() -> None:
+    result = runner.invoke(app, ["add", "--help"])
+
+    assert result.exit_code == 0
+    assert "--label" in result.output
+    assert "-l" in result.output
+
+
+# --------------------------------------------------------------------------- #
+# `add` --deadline flag
+# --------------------------------------------------------------------------- #
+
+
+def test_add_with_deadline(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "-d", "31-12-2026"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["deadline"] is not None
+    assert "2026-12-31" in data["tasks"][0]["deadline"]
+
+
+def test_add_with_deadline_long_flag(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "--deadline", "15-08-2026"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert "2026-08-15" in data["tasks"][0]["deadline"]
+
+
+def test_add_without_deadline_is_none(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads((isolated_cwd / "tasks.json").read_text())
+    assert data["tasks"][0]["deadline"] is None
+
+
+def test_add_rejects_bad_deadline_format(isolated_cwd: Path) -> None:
+    result = runner.invoke(app, ["add", "buy milk", "-d", "2026-12-31"])
+
+    assert result.exit_code == 0
+    assert "dd-mm-yyyy" in result.output
+    assert not (isolated_cwd / "tasks.json").exists()
+
+
+def test_add_help_lists_deadline_option() -> None:
+    result = runner.invoke(app, ["add", "--help"])
+
+    assert result.exit_code == 0
+    assert "--deadline" in result.output
+    assert "-d" in result.output
+
+
 def test_label_add_requires_two_args(isolated_cwd: Path) -> None:
     result = runner.invoke(app, ["label"])
 

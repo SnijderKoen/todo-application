@@ -9,12 +9,22 @@ from todo_app.console import console
 
 def add_cmd(
     title: str = typer.Argument(..., help="The title of the task", metavar="TITLE"),
+    labels: list[str] = typer.Option([], "--label", "-l", help="Label(s) to add to the task"),
+    deadline: str = typer.Option(None, "--deadline", "-d", help="Deadline to add to the task")
 ) -> None:
     """Add a new task with the given title"""
     storage = JSONStorage()
     storage.load()
 
-    task = Task(id=storage.next_id, title=title)
+    date_obj = None
+    if deadline:
+        try:
+            date_obj = datetime.strptime(deadline, "%d-%m-%Y").date()
+        except ValueError:
+            console.print("[red]Please add a deadline in the format dd-mm-yyyy[/red].")
+            return
+
+    task = Task(id=storage.next_id, title=title, labels=labels, deadline=date_obj)
     storage.tasks.append(task)
     storage.next_id += 1
     storage.save()
