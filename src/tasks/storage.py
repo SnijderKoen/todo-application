@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from tasks.label_count import LabelCount
 from tasks.task import Task
 
 
@@ -15,6 +16,7 @@ class JSONStorage:
     version: int = 1
     auto_remove_days: int = 10
     tasks: list[Task] = field(default_factory=list)
+    labels: list[LabelCount] = field(default_factory=list)
 
     def _get_task_from_dict(self, data: dict) -> Task:
         """Convert a dictionary to a Task instance"""
@@ -55,6 +57,10 @@ class JSONStorage:
             self.next_id = data["next_id"]
             self.version = data["version"]
             self.tasks = [self._get_task_from_dict(task) for task in data["tasks"]]
+            self.labels = [
+                LabelCount(label=item["label"], count=item["count"])
+                for item in data.get("labels", [])
+            ]
 
             today = datetime.now(ZoneInfo("Europe/Amsterdam"))
             for task in self.tasks[:]:
@@ -67,6 +73,7 @@ class JSONStorage:
         data = {
             "next_id": self.next_id,
             "version": self.version,
+            "labels": [asdict(label) for label in self.labels],
             "tasks": [self._get_dict_from_task(task) for task in self.tasks],
         }
         json_tmp = self.filename.with_suffix(".tmp")
@@ -89,9 +96,17 @@ class JSONStorage:
         Add a label to a task by its ID
         Returns True if label was added, False if the task was not found
         """
+        lower_label = label.lower()
+        label_count = next((lc for lc in self.labels if lc.label == lower_label), None)
+
         for task in self.tasks:
             if task.id == task_id:
-                task.add_label(label)
+                task.add_label(lower_label)
+                if label_count is not None:
+                    label_count.increment_count()
+                else:
+                    new_lc = LabelCount(label=lower_label)
+                    self.labels.append(new_lc)
                 return True
         return False
     
@@ -100,10 +115,17 @@ class JSONStorage:
         Remove a label from a task by its ID
         Returns 0 if label was removed, 1 if the task was not found, 2 if the label was not found
         """
+        lower_label = label.lower()
         status = 1
         for task in self.tasks:
             if task.id == task_id:
-                status = task.delete_label(label)
+                status = task.delete_label(lower_label)
+                if status == 0:
+                    label_count = next((lc for lc in self.labels if lc.label == lower_label), None)
+                    if label_count is not None:
+                        label_count.decrement_count()
+                        if label_count.get_count() == 0:
+                            self.labels.remove(label_count)
 
         return status
     
