@@ -13,7 +13,6 @@ from pathlib import Path
 
 import pytest
 
-from tasks.label_count import LabelCount
 from tasks.storage import JSONStorage
 from tasks.task import Task
 
@@ -313,11 +312,9 @@ def test_add_label(storage_path: Path) -> None:
     assert data["next_id"] == 4
     assert data["tasks"][0]["labels"] == ["label"]
 
-    # Global label list tracks the label once with a count of 1.
-    assert len(storage.labels) == 1
-    assert storage.labels[0].label == "label"
-    assert storage.labels[0].count == 1
-    assert data["labels"] == [{"label": "label", "count": 1}]
+    # Global label dict tracks the label once with a count of 1.
+    assert storage.labels == {"label": 1}
+    assert data["labels"] == {"label": 1}
 
 
 def test_add_label_task_doesnot_exist(storage_path: Path) -> None:
@@ -331,7 +328,7 @@ def test_add_label_task_doesnot_exist(storage_path: Path) -> None:
     assert data["next_id"] == 4
     assert data["tasks"][0]["title"] == "task"
     assert data["tasks"][0]["labels"] == []
-    assert storage.labels == []
+    assert storage.labels == {}
 
 
 def test_add_label_same_label_single_entry_count_two(storage_path: Path) -> None:
@@ -344,9 +341,7 @@ def test_add_label_same_label_single_entry_count_two(storage_path: Path) -> None
 
     assert task1.labels == ["work"]
     assert task2.labels == ["work"]
-    assert len(storage.labels) == 1
-    assert storage.labels[0].label == "work"
-    assert storage.labels[0].count == 2
+    assert storage.labels == {"work": 2}
 
 
 def test_add_label_different_labels_multiple_entries(storage_path: Path) -> None:
@@ -357,8 +352,7 @@ def test_add_label_different_labels_multiple_entries(storage_path: Path) -> None
     storage.add_label("work", 1)
     storage.add_label("urgent", 1)
 
-    assert len(storage.labels) == 2
-    assert {lc.label: lc.count for lc in storage.labels} == {"work": 1, "urgent": 1}
+    assert storage.labels == {"work": 1, "urgent": 1}
 
 
 def test_labels_survive_save_load_roundtrip(storage_path: Path) -> None:
@@ -368,14 +362,14 @@ def test_labels_survive_save_load_roundtrip(storage_path: Path) -> None:
         next_id=4,
         version=1,
         tasks=[task],
-        labels=[LabelCount(label="work", count=2)],
+        labels={"work": 2},
     )
     storage.save()
 
     reader = JSONStorage()
     reader.load(str(storage_path))
 
-    assert reader.labels == [LabelCount(label="work", count=2)]
+    assert reader.labels == {"work": 2}
 
 
 # --------------------------------------------------------------------------- #
@@ -390,7 +384,7 @@ def test_delete_label(storage_path: Path) -> None:
         next_id=4,
         version=69,
         tasks=[task],
-        labels=[LabelCount(label="label", count=1), LabelCount(label="other", count=1)],
+        labels={"label": 1, "other": 1},
     )
     result = storage.delete_label("label", 3)
     storage.save()
@@ -400,11 +394,9 @@ def test_delete_label(storage_path: Path) -> None:
     assert data["next_id"] == 4
     assert data["tasks"][0]["labels"] == ["other"]
 
-    # "label" dropped to zero and was removed from the global list; "other" remains.
-    assert len(storage.labels) == 1
-    assert storage.labels[0].label == "other"
-    assert storage.labels[0].count == 1
-    assert data["labels"] == [{"label": "other", "count": 1}]
+    # "label" dropped to zero and was removed from the global dict; "other" remains.
+    assert storage.labels == {"other": 1}
+    assert data["labels"] == {"other": 1}
 
 
 def test_delete_label_decrements_global_count(storage_path: Path) -> None:
@@ -415,7 +407,7 @@ def test_delete_label_decrements_global_count(storage_path: Path) -> None:
         next_id=3,
         version=1,
         tasks=[task1, task2],
-        labels=[LabelCount(label="work", count=2)],
+        labels={"work": 2},
     )
 
     result = storage.delete_label("work", 1)
@@ -423,9 +415,7 @@ def test_delete_label_decrements_global_count(storage_path: Path) -> None:
     assert result == 0
     assert task1.labels == []
     assert task2.labels == ["work"]
-    assert len(storage.labels) == 1
-    assert storage.labels[0].label == "work"
-    assert storage.labels[0].count == 1
+    assert storage.labels == {"work": 1}
 
 
 def test_delete_label_task_doesnot_exist(storage_path: Path) -> None:
@@ -435,7 +425,7 @@ def test_delete_label_task_doesnot_exist(storage_path: Path) -> None:
         next_id=4,
         version=69,
         tasks=[task],
-        labels=[LabelCount(label="label", count=1)],
+        labels={"label": 1},
     )
     result = storage.delete_label("label", 4)
     storage.save()
@@ -444,8 +434,7 @@ def test_delete_label_task_doesnot_exist(storage_path: Path) -> None:
     assert result == 1
     assert data["next_id"] == 4
     assert data["tasks"][0]["labels"] == ["label"]
-    assert len(storage.labels) == 1
-    assert storage.labels[0].count == 1
+    assert storage.labels == {"label": 1}
 
 
 def test_delete_label_label_doesnot_exist(storage_path: Path) -> None:
@@ -455,7 +444,7 @@ def test_delete_label_label_doesnot_exist(storage_path: Path) -> None:
         next_id=4,
         version=69,
         tasks=[task],
-        labels=[LabelCount(label="label", count=1)],
+        labels={"label": 1},
     )
     result = storage.delete_label("nonexistent", 3)
     storage.save()
@@ -464,8 +453,7 @@ def test_delete_label_label_doesnot_exist(storage_path: Path) -> None:
     assert result == 2
     assert data["next_id"] == 4
     assert data["tasks"][0]["labels"] == ["label"]
-    assert len(storage.labels) == 1
-    assert storage.labels[0].count == 1
+    assert storage.labels == {"label": 1}
 
 
 # --------------------------------------------------------------------------- #

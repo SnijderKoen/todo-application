@@ -4,14 +4,13 @@ import typer
 
 from tasks.storage import JSONStorage
 from tasks.task import Task
-from tasks.label_count import LabelCount
 from todo_app.console import console
 
 
 def add_cmd(
     title: str = typer.Argument(..., help="The title of the task", metavar="TITLE"),
-    labels: list[str] = typer.Option([], "--label", "-l", help="Label(s) to add to the task"),
-    deadline: str = typer.Option(None, "--deadline", "-d", help="Deadline to add to the task")
+    labels: list[str] = typer.Option(None, "--label", "-l", help="Label(s) to add to the task"),
+    deadline: str = typer.Option(None, "--deadline", "-d", help="Deadline to add to the task"),
 ) -> None:
     """Add a new task with the given title"""
     storage = JSONStorage()
@@ -25,13 +24,10 @@ def add_cmd(
             console.print("[red]Please add a deadline in the format dd-mm-yyyy[/red].")
             return
 
+    labels = labels or []
     task = Task(id=storage.next_id, title=title, labels=labels, deadline=date_obj)
     for label in labels:
-        label_count = next((lc for lc in storage.labels if lc.label == label), None)
-        if label_count is None:
-            storage.labels.append(LabelCount(label=label))
-        else:
-            label_count.increment_count()
+        storage.labels[label] = storage.labels.get(label, 0) + 1
     storage.tasks.append(task)
     storage.next_id += 1
     storage.save()
@@ -67,7 +63,7 @@ def add_deadline_cmd(
         ...,
         help="The ID of the task and the deadline to add",
         metavar="TASK_ID DEADLINE",
-    ),    
+    ),
 ) -> None:
     """Add a deadline to a task with given ID"""
     storage = JSONStorage()
