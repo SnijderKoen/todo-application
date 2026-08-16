@@ -16,6 +16,7 @@ def add_cmd(
     storage = JSONStorage()
     storage.load()
 
+    date_obj = None
     if deadline:
         try:
             date_obj = datetime.strptime(deadline, "%d-%m-%Y").date()
