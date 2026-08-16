@@ -9,7 +9,7 @@ from todo_app.console import console
 
 def add_cmd(
     title: str = typer.Argument(..., help="The title of the task", metavar="TITLE"),
-    labels: list[str] = typer.Option(None, "--label", "-l", help="Label(s) to add to the task"),
+    labels: list[str] = typer.Option([], "--label", "-l", help="Label(s) to add to the task"),
     deadline: str = typer.Option(None, "--deadline", "-d", help="Deadline to add to the task"),
 ) -> None:
     """Add a new task with the given title"""
@@ -24,7 +24,6 @@ def add_cmd(
             console.print("[red]Please add a deadline in the format dd-mm-yyyy[/red].")
             return
 
-    labels = labels or []
     task = Task(id=storage.next_id, title=title, labels=labels, deadline=date_obj)
     for label in labels:
         storage.labels[label] = storage.labels.get(label, 0) + 1
