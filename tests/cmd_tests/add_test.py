@@ -203,7 +203,6 @@ def test_add_same_label_across_tasks_increments_global_count(isolated_cwd: Path)
     assert data["labels"] == {"work": 2}
 
 
-
 def test_label_add_requires_two_args(isolated_cwd: Path) -> None:
     result = runner.invoke(app, ["label"])
 

@@ -120,7 +120,6 @@ def test_delete_one_of_two_tasks_decrements_global_count(isolated_cwd: Path) -> 
     assert data["labels"] == {"work": 1}
 
 
-
 # --------------------------------------------------------------------------- #
 # label_del command
 # --------------------------------------------------------------------------- #

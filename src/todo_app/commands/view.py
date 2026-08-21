@@ -12,40 +12,32 @@ def list_tasks() -> None:
 
     table = Table(title="Tasks To Do")
 
-    table.add_column("ID", 
-                     justify="left", 
-                     no_wrap=True, 
-                     style="bold cyan", 
-                     header_style= "cyan")
+    table.add_column("ID", justify="left", no_wrap=True, style="bold cyan", header_style="cyan")
 
-    table.add_column("Title", 
-                     justify="left", 
-                     no_wrap=False, 
-                     style="thistle1", 
-                     overflow="fold",
-                     header_style="thistle1")
+    table.add_column(
+        "Title",
+        justify="left",
+        no_wrap=False,
+        style="thistle1",
+        overflow="fold",
+        header_style="thistle1",
+    )
 
-    table.add_column("Label(s)", 
-                     justify="left", 
-                     no_wrap=False, 
-                     overflow="fold",
-                     header_style="grey100")
+    table.add_column(
+        "Label(s)", justify="left", no_wrap=False, overflow="fold", header_style="grey100"
+    )
 
-    table.add_column("Completed", 
-                     justify="left", 
-                     no_wrap=True,
-                     header_style="dark_sea_green3")
+    table.add_column("Completed", justify="left", no_wrap=True, header_style="dark_sea_green3")
 
-    table.add_column("Deadline", 
-                     justify="left", 
-                     no_wrap=True,
-                     header_style="red1")
+    table.add_column("Deadline", justify="left", no_wrap=True, header_style="red1")
 
-    table.add_column("Created", 
-                     justify="left", 
-                     no_wrap=True,
-                     style="dim light_steel_blue",
-                     header_style="dim light_steel_blue")
+    table.add_column(
+        "Created",
+        justify="left",
+        no_wrap=True,
+        style="dim light_steel_blue",
+        header_style="dim light_steel_blue",
+    )
 
     for task in storage.tasks:
         label_str = ", ".join(task.labels) if task.labels else "[dim]—[/dim]"

@@ -39,7 +39,5 @@ def format_completed_mark(completed: bool) -> str:
 
 def format_created_at(created_at: date) -> str:
     """Format the created at date"""
-    completed_at_str = (
-        f"{created_at.strftime('%d-%m-%Y')}"
-    )
+    completed_at_str = f"{created_at.strftime('%d-%m-%Y')}"
     return completed_at_str
