@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import typer
+import todo_app.colors as colors
 
 from tasks.storage import JSONStorage
 from tasks.task import Task
@@ -21,7 +22,7 @@ def add_cmd(
         try:
             date_obj = datetime.strptime(deadline, "%d-%m-%Y").date()
         except ValueError:
-            console.print("[red]Please add a deadline in the format dd-mm-yyyy[/red].")
+            console.print(f"[{colors.ERROR_COLOR}]Please add a deadline in the format dd-mm-yyyy[/{colors.ERROR_COLOR}].")
             return
 
     task = Task(id=storage.next_id, title=title, labels=labels, deadline=date_obj)
@@ -31,7 +32,7 @@ def add_cmd(
     storage.next_id += 1
     storage.save()
 
-    console.print(f"Added task [green]{task.title}[/green] with ID [cyan]{task.id}[/cyan].")
+    console.print(f"Added task [{colors.TITLE_COLOR}]]{task.title}[/{colors.TITLE_COLOR}] with ID [{colors.ID_COLOR}]{task.id}[/{colors.ID_COLOR}].")
 
 
 def add_label_cmd(
@@ -49,12 +50,12 @@ def add_label_cmd(
 
     if storage.add_label(label, task_id):
         console.print(
-            f"Succesfully added label: [green1]{label}[/green1] \
-            to task with ID [medium_purple1]{task_id}[/medium_purple1]"
+            f"Succesfully added label: [{colors.LABEL_COLORS[0]}]{label}[/{colors.LABEL_COLORS[0]}] \
+            to task with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}]"
         )
         storage.save()
     else:
-        console.print(f"No task found with ID [red]{task_id}[/red].")
+        console.print(f"[{colors.ERROR_COLOR}]No[/{colors.ERROR_COLOR}] task found with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}].")
 
 
 def add_deadline_cmd(
@@ -73,14 +74,14 @@ def add_deadline_cmd(
     try:
         date_obj = datetime.strptime(date_str, "%d-%m-%Y").date()
     except ValueError:
-        console.print("[red]Please add a deadline in the format dd-mm-yyyy[/red].")
+        console.print(f"[{colors.ERROR_COLOR}]Please add a deadline in the format dd-mm-yyyy[/{colors.ERROR_COLOR}].")
         return
 
     if storage.add_deadline(task_id, date_obj):
         console.print(
-            f"Successfully added deadline: [green1]{date_str}[/green1] \
-            to task with ID [medium_purple1]{task_id}[/medium_purple1]"
+            f"Successfully added deadline: [{colors.DEADLINE_COLOR}]{date_str}[/{colors.DEADLINE_COLOR}] \
+            to task with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}]"
         )
         storage.save()
     else:
-        console.print(f"No task found with ID [red]{task_id}[/red].")
+        console.print(f"[{colors.ERROR_COLOR}]No[/{colors.ERROR_COLOR}] task found with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}].")

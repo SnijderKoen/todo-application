@@ -38,6 +38,15 @@ LABEL_COLORS: list[str] = [
     "pale_violet_red1",
 ]
 
+ID_COLOR = "cyan"
+TITLE_COLOR = "thistle1"
+COMPLETED_COLOR = "dark_sea_green3"
+MARK_COMPLETED_COLOR = "green3"
+MARK_UNCOMPLETED_COLOR = "yellow"
+DEADLINE_COLOR = "red1"
+CREATED_COLOR = "dim light_steel_blue"
+ERROR_COLOR = "red"
+
 
 if __name__ == "__main__":
     from rich.console import Console
