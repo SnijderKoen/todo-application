@@ -1,4 +1,5 @@
 from datetime import date
+
 import todo_app.colors as colors
 
 
@@ -10,16 +11,16 @@ def format_deadline(deadline: date | None, completed: bool) -> str:
     days_left = (deadline - date.today()).days
 
     if days_left < 0:
-        color = "red"
+        color = colors.DEADLINE_OVERDUE_COLOR
         hint = "overdue" if days_left == -1 else f"{abs(days_left)}d overdue"
     elif days_left == 0:
-        color = "yellow"
+        color = colors.DEADLINE_TODAY_COLOR
         hint = "today"
     elif days_left <= 7:
-        color = "orange1"
+        color = colors.DEADLINE_SOON_COLOR
         hint = f"in {days_left}d"
     else:
-        color = "green"
+        color = colors.DEADLINE_OK_COLOR
         hint = f"in {days_left}d"
 
     striked = ""
@@ -34,11 +35,11 @@ def format_deadline(deadline: date | None, completed: bool) -> str:
 
 def format_completed_mark(completed: bool) -> str:
     """Format the completed mark based on if it is completed or not"""
-    completed_mark = f"[{colors.MARK_COMPLETED_COLOR}]✓[/{colors.MARK_COMPLETED_COLOR}]" if completed else f"[{colors.MARK_UNCOMPLETED_COLOR}]✗[/{colors.MARK_UNCOMPLETED_COLOR}]"
-    return completed_mark
+    if completed:
+        return f"[{colors.MARK_COMPLETED_COLOR}]✓[/{colors.MARK_COMPLETED_COLOR}]"
+    return f"[{colors.MARK_UNCOMPLETED_COLOR}]✗[/{colors.MARK_UNCOMPLETED_COLOR}]"
 
 
 def format_created_at(created_at: date) -> str:
     """Format the created at date"""
-    completed_at_str = f"{created_at.strftime('%d-%m-%Y')}"
-    return completed_at_str
+    return created_at.strftime("%d-%m-%Y")
