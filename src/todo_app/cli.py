@@ -7,6 +7,7 @@ from todo_app import __version__
 from todo_app.commands.add import add_cmd, add_deadline_cmd, add_label_cmd
 from todo_app.commands.delete import delete_cmd, delete_deadline_cmd, delete_label_cmd
 from todo_app.commands.misc import complete_task, uncomplete_task
+from todo_app.commands.view import list_tasks
 from todo_app.console import console
 
 app = typer.Typer(
@@ -26,6 +27,7 @@ app.command("complete")(complete_task)
 app.command("uncomplete")(uncomplete_task)
 app.command("deadline")(add_deadline_cmd)
 app.command("deadline_del")(delete_deadline_cmd)
+app.command("ls")(list_tasks)
 
 
 def _version_callback(value: bool) -> None:
