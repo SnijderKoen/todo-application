@@ -3,6 +3,7 @@ from rich.table import Table
 from tasks.storage import JSONStorage
 from todo_app.console import console
 from todo_app.formatting import format_completed_mark, format_created_at, format_deadline
+from todo_app.colors import LABEL_COLORS
 
 
 def list_tasks() -> None:
@@ -39,8 +40,20 @@ def list_tasks() -> None:
         header_style="dim light_steel_blue",
     )
 
+    curr_color_ind = 0
+    label_color_dict = {}
+    for label in storage.labels.keys():
+        label_color_dict[label] = LABEL_COLORS[curr_color_ind]
+        curr_color_ind = (curr_color_ind + 1) % len(LABEL_COLORS)
+
     for task in storage.tasks:
-        label_str = ", ".join(task.labels) if task.labels else "[dim]—[/dim]"
+        label_str = ""
+        if task.labels:
+            for label in task.labels:
+                label_str += f"[{label_color_dict[label]}]{label}[/{label_color_dict[label]}], "
+            label_str = label_str[:-2]
+        else:
+            label_str = "[dim]—[/dim]"
 
         table.add_row(
             str(task.id),
