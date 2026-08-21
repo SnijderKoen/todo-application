@@ -1,10 +1,8 @@
-from datetime import date
-
 from rich.table import Table
 
 from tasks.storage import JSONStorage
 from todo_app.console import console
-from todo_app.formatting import format_deadline, format_completed_mark
+from todo_app.formatting import format_deadline, format_completed_mark, format_created_at
 
 
 def list_tasks() -> None:
@@ -19,10 +17,12 @@ def list_tasks() -> None:
     table.add_column("Label(s)", justify="left", no_wrap=False)
     table.add_column("Completed", justify="left", no_wrap=True)
     table.add_column("Deadline", justify="left", no_wrap=True)
+    table.add_column("Created", justify="left", no_wrap=True)
 
     for task in storage.tasks:
         label_str = ", ".join(task.labels) if task.labels else "[dim]—[/dim]"
         completed_mark = format_completed_mark(task.completed)
+        completed_at_str = format_created_at(task.created)
 
         table.add_row(
             str(task.id),
@@ -30,6 +30,7 @@ def list_tasks() -> None:
             label_str,
             completed_mark,
             format_deadline(task.deadline),
+            completed_at_str,
         )
 
     console.print(table)

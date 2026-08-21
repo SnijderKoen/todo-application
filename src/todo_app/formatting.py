@@ -28,3 +28,9 @@ def format_completed_mark(completed: bool) -> str:
     """Format the completed mark based on if it is completed or not"""
     completed_mark = "[green3]✓[/green3]" if completed else "[yellow]✗[/yellow]"
     return completed_mark
+
+
+def format_created_at(created_at: date) -> str:
+    """Format the created at date"""
+    completed_at_str = f"[light_steel_blue]{created_at.strftime('%d-%m-%Y')}[/light_steel_blue]"
+    return completed_at_str
