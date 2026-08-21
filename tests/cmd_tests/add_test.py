@@ -29,6 +29,7 @@ def create_tasks() -> None:
 def isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Run the test with the CWD set to a fresh temp dir."""
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("TODO_TASKS_FILE", str(tmp_path / "tasks.json"))
     return tmp_path
 
 
