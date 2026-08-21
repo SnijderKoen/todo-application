@@ -55,15 +55,7 @@ def main(
     if ctx.invoked_subcommand is not None:
         return
 
-    console.print(
-        Panel.fit(
-            "[bold]todo[/bold] scaffold is ready.\n"
-            "Run [cyan]todo --help[/cyan] to see available commands.\n"
-            "Real views & subcommands arrive in the next milestone.",
-            title="todo",
-            border_style="cyan",
-        )
-    )
+    list_tasks()
 
 
 if __name__ == "__main__":
