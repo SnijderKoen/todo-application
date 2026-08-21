@@ -1,4 +1,5 @@
 from datetime import date
+import todo_app.colors as colors
 
 
 def format_deadline(deadline: date | None, completed: bool) -> str:
@@ -33,7 +34,7 @@ def format_deadline(deadline: date | None, completed: bool) -> str:
 
 def format_completed_mark(completed: bool) -> str:
     """Format the completed mark based on if it is completed or not"""
-    completed_mark = "[green3]✓[/green3]" if completed else "[yellow]✗[/yellow]"
+    completed_mark = f"[{colors.MARK_COMPLETED_COLOR}]✓[/{colors.MARK_COMPLETED_COLOR}]" if completed else f"[{colors.MARK_UNCOMPLETED_COLOR}]✗[/{colors.MARK_UNCOMPLETED_COLOR}]"
     return completed_mark
 
 

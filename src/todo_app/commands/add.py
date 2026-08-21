@@ -32,9 +32,9 @@ def add_cmd(
     storage.next_id += 1
     storage.save()
 
-    console.print(f"Added task [{colors.TITLE_COLOR}]]{task.title}[/{colors.TITLE_COLOR}] with ID [{colors.ID_COLOR}]{task.id}[/{colors.ID_COLOR}].")
+    console.print(f"[{colors.ADDED_COLOR}]Added[/{colors.ADDED_COLOR}] task [{colors.TITLE_COLOR}]]{task.title}[/{colors.TITLE_COLOR}] with ID [{colors.ID_COLOR}]{task.id}[/{colors.ID_COLOR}].")
     for label in labels:
-        console.print(f"    With label: [{colors.LABEL_COLORS[0]}]{label}[/{colors.LABEL_COLORS[0]}]")
+        console.print(f"    With label: [{colors.LABEL_COLOR}]{label}[/{colors.LABEL_COLOR}]")
 
     if deadline:
         console.print(f"    With deadline: [{colors.DEADLINE_COLOR}]{deadline}[/{colors.DEADLINE_COLOR}]")
@@ -55,12 +55,12 @@ def add_label_cmd(
 
     if storage.add_label(label, task_id):
         console.print(
-            f"Succesfully added label: [{colors.LABEL_COLORS[0]}]{label}[/{colors.LABEL_COLORS[0]}] \
+            f"[{colors.ADDED_COLOR}]Added[/{colors.ADDED_COLOR}] label: [{colors.LABEL_COLOR}]{label}[/{colors.LABEL_COLOR}] \
             to task with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}]"
         )
         storage.save()
     else:
-        console.print(f"[{colors.ERROR_COLOR}]No[/{colors.ERROR_COLOR}] task found with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}].")
+        console.print(f"[{colors.NOT_FOUND_COLOR}]No task found with ID[/{colors.NOT_FOUND_COLOR}] [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}].")
 
 
 def add_deadline_cmd(
@@ -84,7 +84,7 @@ def add_deadline_cmd(
 
     if storage.add_deadline(task_id, date_obj):
         console.print(
-            f"Successfully added deadline: [{colors.DEADLINE_COLOR}]{date_str}[/{colors.DEADLINE_COLOR}] \
+            f"[{colors.ADDED_COLOR}]Added[/{colors.ADDED_COLOR}] deadline: [{colors.DEADLINE_COLOR}]{date_str}[/{colors.DEADLINE_COLOR}] \
             to task with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}]"
         )
         storage.save()

@@ -46,6 +46,10 @@ MARK_UNCOMPLETED_COLOR = "yellow"
 DEADLINE_COLOR = "red1"
 CREATED_COLOR = "dim light_steel_blue"
 ERROR_COLOR = "red"
+LABEL_COLOR = "grey100"
+ADDED_COLOR = "green"
+DELETED_COLOR = "bright_red"
+NOT_FOUND_COLOR = "orange_red1"
 
 
 if __name__ == "__main__":

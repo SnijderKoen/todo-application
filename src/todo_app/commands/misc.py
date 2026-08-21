@@ -2,7 +2,7 @@ import typer
 
 from tasks.storage import JSONStorage
 from todo_app.console import console
-
+import todo_app.colors as colors
 
 def complete_task(
     task_id: int = typer.Argument(..., help="The ID of the task to complete", metavar="TASK_ID"),
@@ -13,11 +13,11 @@ def complete_task(
 
     if storage.complete_task(task_id):
         console.print(
-            f"[green]Completed[/green] task with ID [medium_purple1]{task_id}[/medium_purple1]"
+            f"[{colors.MARK_COMPLETED_COLOR}]Completed[/{colors.MARK_COMPLETED_COLOR}] task with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}]"
         )
         storage.save()
     else:
-        console.print(f"No task found with ID [red]{task_id}[/red].")
+        console.print(f"[{colors.ERROR_COLOR}]No[/{colors.ERROR_COLOR}] task found with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}].")
 
 
 def uncomplete_task(
@@ -29,9 +29,9 @@ def uncomplete_task(
 
     if storage.uncomplete_task(task_id):
         console.print(
-            f"[orange1]Uncompleted[/orange1] "
-            f"task with ID [medium_purple1]{task_id}[/medium_purple1]"
+            f"[{colors.MARK_UNCOMPLETED_COLOR}]Uncompleted[/{colors.MARK_UNCOMPLETED_COLOR}] "
+            f"task with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}]"
         )
         storage.save()
     else:
-        console.print(f"No task found with ID [red]{task_id}[/red].")
+        console.print(f"[{colors.ERROR_COLOR}]No[/{colors.ERROR_COLOR}] task found with ID [{colors.ID_COLOR}]{task_id}[/{colors.ID_COLOR}].")
