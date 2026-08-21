@@ -21,16 +21,14 @@ def list_tasks() -> None:
 
     for task in storage.tasks:
         label_str = ", ".join(task.labels) if task.labels else "[dim]—[/dim]"
-        completed_mark = format_completed_mark(task.completed)
-        completed_at_str = format_created_at(task.created)
 
         table.add_row(
             str(task.id),
             task.title,
             label_str,
-            completed_mark,
-            format_deadline(task.deadline),
-            completed_at_str,
+            format_completed_mark(task.completed),
+            format_deadline(task.deadline, task.completed),
+            format_created_at(task.created),
         )
 
     console.print(table)

@@ -1,8 +1,8 @@
 from datetime import date
 
 
-def format_deadline(deadline: date | None) -> str:
-    """Format a deadline with an urgency color and a relative hint."""
+def format_deadline(deadline: date | None, completed: bool) -> str:
+    """Format a deadline with an urgency color and a relative hint. Strike it if completed"""
     if deadline is None:
         return "[dim]—[/dim]"
 
@@ -21,7 +21,11 @@ def format_deadline(deadline: date | None) -> str:
         color = "green"
         hint = f"in {days_left}d"
 
-    return f"[{color}]{deadline.strftime('%d-%m-%Y')}[/{color}] [dim]({hint})[/dim]"
+    striked = ""
+    if completed:
+        striked = "strike"
+
+    return f"[{color} {striked}]{deadline.strftime('%d-%m-%Y')}[/{color} {striked}] [dim]({hint})[/dim]"
 
 
 def format_completed_mark(completed: bool) -> str:
@@ -32,5 +36,5 @@ def format_completed_mark(completed: bool) -> str:
 
 def format_created_at(created_at: date) -> str:
     """Format the created at date"""
-    completed_at_str = f"[light_steel_blue]{created_at.strftime('%d-%m-%Y')}[/light_steel_blue]"
+    completed_at_str = f"[dim light_steel_blue]{created_at.strftime('%d-%m-%Y')}[/dim light_steel_blue]"
     return completed_at_str
