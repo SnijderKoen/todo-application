@@ -1,5 +1,6 @@
 from datetime import date
 
+
 def format_deadline(deadline: date | None) -> str:
     """Format a deadline with an urgency color and a relative hint."""
     if deadline is None:
@@ -21,3 +22,9 @@ def format_deadline(deadline: date | None) -> str:
         hint = f"in {days_left}d"
 
     return f"[{color}]{deadline.strftime('%d-%m-%Y')}[/{color}] [dim]({hint})[/dim]"
+
+
+def format_completed_mark(completed: bool) -> str:
+    """Format the completed mark based on if it is completed or not"""
+    completed_mark = "[green3]✓[/green3]" if completed else "[yellow]✗[/yellow]"
+    return completed_mark
