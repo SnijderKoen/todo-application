@@ -33,6 +33,11 @@ def add_cmd(
     storage.save()
 
     console.print(f"Added task [{colors.TITLE_COLOR}]]{task.title}[/{colors.TITLE_COLOR}] with ID [{colors.ID_COLOR}]{task.id}[/{colors.ID_COLOR}].")
+    for label in labels:
+        console.print(f"    With label: [{colors.LABEL_COLORS[0]}]{label}[/{colors.LABEL_COLORS[0]}]")
+
+    if deadline:
+        console.print(f"    With deadline: [{colors.DEADLINE_COLOR}]{deadline}[/{colors.DEADLINE_COLOR}]")
 
 
 def add_label_cmd(
