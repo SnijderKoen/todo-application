@@ -1,11 +1,15 @@
 import json
 import os
 from dataclasses import asdict, dataclass, field
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 from tasks.task import Task
+
+
+def _to_date(value: str) -> date:
+    """Parse an ISO date string, ignoring any time-of-day/timezone suffix."""
+    return date.fromisoformat(value.split("T")[0])
 
 
 @dataclass
@@ -23,12 +27,10 @@ class JSONStorage:
             id=data["id"],
             title=data["title"],
             labels=list(data.get("labels", [])),
-            created=datetime.fromisoformat(data["created"]),
+            created=_to_date(data["created"]),
             completed=data["completed"],
-            completed_at=datetime.fromisoformat(data["completed_at"])
-            if data["completed_at"]
-            else None,
-            deadline=date.fromisoformat(data["deadline"]) if data["deadline"] is not None else None,
+            completed_at=_to_date(data["completed_at"]) if data["completed_at"] else None,
+            deadline=_to_date(data["deadline"]) if data["deadline"] is not None else None,
         )
 
     def _get_dict_from_task(self, task: Task) -> dict:
@@ -59,7 +61,7 @@ class JSONStorage:
                 labels = {item["label"]: item["count"] for item in labels}
             self.labels = labels
 
-            today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+            today = date.today()
             for task in self.tasks[:]:
                 if (
                     task.completed

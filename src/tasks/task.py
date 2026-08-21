@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from datetime import date
 
 
 @dataclass
@@ -8,9 +7,9 @@ class Task:
     id: int
     title: str
     labels: list[str] = field(default_factory=list)
-    created: datetime = field(default_factory=datetime.now)
+    created: date = field(default_factory=date.today)
     completed: bool = False
-    completed_at: datetime | None = None
+    completed_at: date | None = None
     deadline: date | None = None
 
     def add_label(self, label: str) -> None:
@@ -30,9 +29,9 @@ class Task:
         return 2
 
     def complete_task(self) -> None:
-        """Complete a task at the current time"""
+        """Complete a task and record today's date"""
         self.completed = True
-        self.completed_at = datetime.now(ZoneInfo("Europe/Amsterdam"))
+        self.completed_at = date.today()
 
     def uncomplete_task(self) -> None:
         """Uncomplete a task and reset completed at"""

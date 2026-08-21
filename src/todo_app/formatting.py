@@ -25,7 +25,10 @@ def format_deadline(deadline: date | None, completed: bool) -> str:
     if completed:
         striked = "strike"
 
-    return f"[{color} {striked}]{deadline.strftime('%d-%m-%Y')}[/{color} {striked}] [dim]({hint})[/dim]"
+    return (
+        f"[{color} {striked}]{deadline.strftime('%d-%m-%Y')}"
+        f"[/{color} {striked}] [dim]({hint})[/dim]"
+    )
 
 
 def format_completed_mark(completed: bool) -> str:
@@ -36,5 +39,7 @@ def format_completed_mark(completed: bool) -> str:
 
 def format_created_at(created_at: date) -> str:
     """Format the created at date"""
-    completed_at_str = f"[dim light_steel_blue]{created_at.strftime('%d-%m-%Y')}[/dim light_steel_blue]"
+    completed_at_str = (
+        f"[dim light_steel_blue]{created_at.strftime('%d-%m-%Y')}[/dim light_steel_blue]"
+    )
     return completed_at_str

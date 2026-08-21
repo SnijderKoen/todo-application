@@ -2,7 +2,7 @@ from rich.table import Table
 
 from tasks.storage import JSONStorage
 from todo_app.console import console
-from todo_app.formatting import format_deadline, format_completed_mark, format_created_at
+from todo_app.formatting import format_completed_mark, format_created_at, format_deadline
 
 
 def list_tasks() -> None:
