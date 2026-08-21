@@ -1,7 +1,7 @@
 import json
 import os
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -28,9 +28,7 @@ class JSONStorage:
             completed_at=datetime.fromisoformat(data["completed_at"])
             if data["completed_at"]
             else None,
-            deadline=datetime.fromisoformat(data["deadline"])
-            if data["deadline"] is not None
-            else None,
+            deadline=date.fromisoformat(data["deadline"]) if data["deadline"] is not None else None,
         )
 
     def _get_dict_from_task(self, task: Task) -> dict:
@@ -154,7 +152,7 @@ class JSONStorage:
 
         return False
 
-    def add_deadline(self, task_id: int, deadline: datetime) -> bool:
+    def add_deadline(self, task_id: int, deadline: date) -> bool:
         """
         Add a deadline to a task with task_id and return True
         If the task does not exist, return False

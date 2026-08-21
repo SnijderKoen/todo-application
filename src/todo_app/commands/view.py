@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 
 from rich.table import Table
 
@@ -6,15 +6,10 @@ from tasks.storage import JSONStorage
 from todo_app.console import console
 
 
-def _format_deadline(deadline: date | datetime | None) -> str:
+def _format_deadline(deadline: date | None) -> str:
     """Format a deadline with an urgency color and a relative hint."""
     if deadline is None:
         return "[dim]—[/dim]"
-
-    # `add` stores a `date`, but `storage.load()` reads it back as a `datetime`.
-    # Normalize both to a plain `date` before doing calendar math.
-    if isinstance(deadline, datetime):
-        deadline = deadline.date()
 
     days_left = (deadline - date.today()).days
 

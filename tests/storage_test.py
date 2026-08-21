@@ -8,7 +8,7 @@ finishes.  No manual cleanup required.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
@@ -28,7 +28,7 @@ def make_task(
     completed: bool = False,
     completed_at: datetime | None = None,
     created: datetime | None = None,
-    deadline: datetime | None = None,
+    deadline: date | None = None,
 ) -> Task:
     """Construct a Task with sensible defaults for tests."""
     return Task(

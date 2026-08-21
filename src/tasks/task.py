@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 
@@ -11,7 +11,7 @@ class Task:
     created: datetime = field(default_factory=datetime.now)
     completed: bool = False
     completed_at: datetime | None = None
-    deadline: datetime | None = None
+    deadline: date | None = None
 
     def add_label(self, label: str) -> None:
         """Add a label to the task"""
@@ -39,7 +39,7 @@ class Task:
         self.completed = False
         self.completed_at = None
 
-    def add_deadline(self, deadline: datetime) -> None:
+    def add_deadline(self, deadline: date) -> None:
         """Add a deadline to a task"""
         self.deadline = deadline
 
