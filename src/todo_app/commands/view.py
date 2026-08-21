@@ -13,8 +13,8 @@ def list_tasks() -> None:
     table = Table(title="Tasks TODO")
 
     table.add_column("ID", justify="left", no_wrap=True, style="bold cyan")
-    table.add_column("Title", justify="left", no_wrap=False, style="bold green")
-    table.add_column("Label(s)", justify="left", no_wrap=False)
+    table.add_column("Title", justify="left", no_wrap=False, style="bold green", overflow="fold")
+    table.add_column("Label(s)", justify="left", no_wrap=False, overflow="fold")
     table.add_column("Completed", justify="left", no_wrap=True)
     table.add_column("Deadline", justify="left", no_wrap=True)
     table.add_column("Created", justify="left", no_wrap=True)
