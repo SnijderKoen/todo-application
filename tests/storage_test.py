@@ -8,7 +8,7 @@ finishes.  No manual cleanup required.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
@@ -26,16 +26,16 @@ def make_task(
     title: str = "buy milk",
     labels: list[str] | None = None,
     completed: bool = False,
-    completed_at: datetime | None = None,
-    created: datetime | None = None,
-    deadline: datetime | None = None,
+    completed_at: date | None = None,
+    created: date | None = None,
+    deadline: date | None = None,
 ) -> Task:
     """Construct a Task with sensible defaults for tests."""
     return Task(
         id=task_id,
         title=title,
         labels=list(labels) if labels is not None else [],
-        created=created or datetime(2026, 4, 19, 12, 0, 0),
+        created=created or date(2026, 4, 19),
         completed=completed,
         completed_at=completed_at,
         deadline=deadline,
@@ -53,10 +53,10 @@ def storage_path(tmp_path: Path) -> Path:
 # --------------------------------------------------------------------------- #
 
 
-def test_get_dict_from_task_serializes_datetime_to_iso() -> None:
+def test_get_dict_from_task_serializes_dates_to_iso() -> None:
     storage = JSONStorage()
-    created = datetime(2026, 4, 19, 12, 30, 0)
-    completed_at = datetime(2026, 4, 20, 8, 15, 0)
+    created = date(2026, 4, 19)
+    completed_at = date(2026, 4, 20)
     task = make_task(
         task_id=7,
         title="ship it",
@@ -97,7 +97,7 @@ def test_get_task_from_dict_roundtrip() -> None:
         title="write tests",
         labels=["dev"],
         completed=True,
-        completed_at=datetime(2026, 4, 19, 15, 0, 0),
+        completed_at=date(2026, 4, 19),
     )
 
     encoded = storage._get_dict_from_task(original)
@@ -204,7 +204,7 @@ def test_load_reads_existing_file(storage_path: Path) -> None:
     assert first.labels == ["work"]
     assert first.completed is False
     assert first.completed_at is None
-    assert first.created == datetime(2026, 4, 19, 9, 0, 0, tzinfo=tz)
+    assert first.created == date(2026, 4, 19)
 
 
 def test_load_empty_task_list(storage_path: Path) -> None:
@@ -255,9 +255,7 @@ def test_save_removes_tmp_file(storage_path: Path) -> None:
 
 def test_save_then_load_roundtrip(storage_path: Path) -> None:
     """Writing via save() and reading back via load() preserves all data."""
-    from zoneinfo import ZoneInfo
-
-    today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+    today = date.today()
     tasks = [
         make_task(task_id=1, title="first", labels=["a"]),
         make_task(
