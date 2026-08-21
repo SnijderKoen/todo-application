@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import typer
-from rich.panel import Panel
 
 from todo_app import __version__
 from todo_app.commands.add import add_cmd, add_deadline_cmd, add_label_cmd
