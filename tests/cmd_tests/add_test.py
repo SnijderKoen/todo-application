@@ -263,7 +263,7 @@ def test_deadline_prints_confirmation(isolated_cwd: Path) -> None:
     assert result.exit_code == 0
     assert "15-08-2026" in result.output
     assert "1" in result.output
-    assert "Successfully added" in result.output
+    assert "Added deadline" in result.output
 
 
 def test_deadline_rejects_bad_format(isolated_cwd: Path) -> None:

@@ -12,10 +12,10 @@ def test_version_flag() -> None:
     assert __version__ in result.stdout
 
 
-def test_bare_invocation_shows_placeholder() -> None:
+def test_bare_invocation_shows_task_list() -> None:
     result = runner.invoke(app, [])
     assert result.exit_code == 0
-    assert "scaffold is ready" in result.stdout
+    assert "Tasks To Do" in result.stdout
 
 
 def test_help_lists_app_name() -> None:

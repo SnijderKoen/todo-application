@@ -1,9 +1,9 @@
 from rich.table import Table
 
+import todo_app.colors as colors
 from tasks.storage import JSONStorage
 from todo_app.console import console
 from todo_app.formatting import format_completed_mark, format_created_at, format_deadline
-from todo_app.colors import LABEL_COLORS
 
 
 def list_tasks() -> None:
@@ -13,38 +13,58 @@ def list_tasks() -> None:
 
     table = Table(title="Tasks To Do")
 
-    table.add_column("ID", justify="left", no_wrap=True, style="bold cyan", header_style="cyan")
+    table.add_column(
+        "ID",
+        justify="left",
+        no_wrap=True,
+        style=f"bold {colors.ID_COLOR}",
+        header_style=f"{colors.ID_COLOR}",
+    )
 
     table.add_column(
         "Title",
         justify="left",
         no_wrap=False,
-        style="thistle1",
+        style=f"{colors.TITLE_COLOR}",
         overflow="fold",
-        header_style="thistle1",
+        header_style=f"{colors.TITLE_COLOR}",
     )
 
     table.add_column(
-        "Label(s)", justify="left", no_wrap=False, overflow="fold", header_style="grey100"
+        "Label(s)",
+        justify="left",
+        no_wrap=False,
+        overflow="fold",
+        header_style=f"{colors.LABEL_COLOR}",
     )
 
-    table.add_column("Completed", justify="left", no_wrap=True, header_style="dark_sea_green3")
+    table.add_column(
+        "Completed",
+        justify="left",
+        no_wrap=True,
+        header_style=f"{colors.COMPLETED_COLOR}",
+    )
 
-    table.add_column("Deadline", justify="left", no_wrap=True, header_style="red1")
+    table.add_column(
+        "Deadline",
+        justify="left",
+        no_wrap=True,
+        header_style=f"{colors.DEADLINE_COLOR}",
+    )
 
     table.add_column(
         "Created",
         justify="left",
         no_wrap=True,
-        style="dim light_steel_blue",
-        header_style="dim light_steel_blue",
+        style=f"{colors.CREATED_COLOR}",
+        header_style=f"{colors.CREATED_COLOR}",
     )
 
     curr_color_ind = 0
     label_color_dict = {}
-    for label in storage.labels.keys():
-        label_color_dict[label] = LABEL_COLORS[curr_color_ind]
-        curr_color_ind = (curr_color_ind + 1) % len(LABEL_COLORS)
+    for label in storage.labels:
+        label_color_dict[label] = colors.LABEL_COLORS[curr_color_ind]
+        curr_color_ind = (curr_color_ind + 1) % len(colors.LABEL_COLORS)
 
     for task in storage.tasks:
         label_str = ""
