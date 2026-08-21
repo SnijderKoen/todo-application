@@ -21,6 +21,7 @@ runner = CliRunner()
 @pytest.fixture
 def isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("TODO_TASKS_FILE", str(tmp_path / "tasks.json"))
     return tmp_path
 
 

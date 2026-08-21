@@ -22,6 +22,7 @@ runner = CliRunner()
 @pytest.fixture
 def isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("TODO_TASKS_FILE", str(tmp_path / "tasks.json"))
     return tmp_path
 
 
@@ -118,7 +119,6 @@ def test_delete_one_of_two_tasks_decrements_global_count(isolated_cwd: Path) -> 
 
     data = json.loads((isolated_cwd / "tasks.json").read_text())
     assert data["labels"] == {"work": 1}
-
 
 
 # --------------------------------------------------------------------------- #

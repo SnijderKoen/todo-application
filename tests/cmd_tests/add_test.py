@@ -29,6 +29,7 @@ def create_tasks() -> None:
 def isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Run the test with the CWD set to a fresh temp dir."""
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("TODO_TASKS_FILE", str(tmp_path / "tasks.json"))
     return tmp_path
 
 
@@ -203,7 +204,6 @@ def test_add_same_label_across_tasks_increments_global_count(isolated_cwd: Path)
     assert data["labels"] == {"work": 2}
 
 
-
 def test_label_add_requires_two_args(isolated_cwd: Path) -> None:
     result = runner.invoke(app, ["label"])
 
@@ -264,7 +264,7 @@ def test_deadline_prints_confirmation(isolated_cwd: Path) -> None:
     assert result.exit_code == 0
     assert "15-08-2026" in result.output
     assert "1" in result.output
-    assert "Successfully added" in result.output
+    assert "Added deadline" in result.output
 
 
 def test_deadline_rejects_bad_format(isolated_cwd: Path) -> None:

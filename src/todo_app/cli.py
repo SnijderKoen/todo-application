@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import typer
-from rich.panel import Panel
 
 from todo_app import __version__
 from todo_app.commands.add import add_cmd, add_deadline_cmd, add_label_cmd
 from todo_app.commands.delete import delete_cmd, delete_deadline_cmd, delete_label_cmd
 from todo_app.commands.misc import complete_task, uncomplete_task
+from todo_app.commands.view import list_tasks
 from todo_app.console import console
 
 app = typer.Typer(
@@ -26,6 +26,7 @@ app.command("complete")(complete_task)
 app.command("uncomplete")(uncomplete_task)
 app.command("deadline")(add_deadline_cmd)
 app.command("deadline_del")(delete_deadline_cmd)
+app.command("ls")(list_tasks)
 
 
 def _version_callback(value: bool) -> None:
@@ -53,15 +54,7 @@ def main(
     if ctx.invoked_subcommand is not None:
         return
 
-    console.print(
-        Panel.fit(
-            "[bold]todo[/bold] scaffold is ready.\n"
-            "Run [cyan]todo --help[/cyan] to see available commands.\n"
-            "Real views & subcommands arrive in the next milestone.",
-            title="todo",
-            border_style="cyan",
-        )
-    )
+    list_tasks()
 
 
 if __name__ == "__main__":

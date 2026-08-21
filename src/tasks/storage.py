@@ -1,11 +1,31 @@
 import json
 import os
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import date
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 from tasks.task import Task
+
+
+def _to_date(value: str) -> date:
+    """Parse an ISO date string, ignoring any time-of-day/timezone suffix."""
+    return date.fromisoformat(value.split("T")[0])
+
+
+def default_tasks_file() -> Path:
+    """Return the default location for the task data file.
+
+    Uses an explicit ``TODO_TASKS_FILE`` override when set (e.g. in tests),
+    otherwise the XDG data directory, so the app keeps a single list no
+    matter which directory it's run from.
+    """
+    override = os.environ.get("TODO_TASKS_FILE")
+    if override:
+        return Path(override).expanduser()
+
+    xdg_data_home = os.environ.get("XDG_DATA_HOME")
+    data_home = Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
+    return data_home / "todo-app" / "tasks.json"
 
 
 @dataclass
@@ -23,14 +43,10 @@ class JSONStorage:
             id=data["id"],
             title=data["title"],
             labels=list(data.get("labels", [])),
-            created=datetime.fromisoformat(data["created"]),
+            created=_to_date(data["created"]),
             completed=data["completed"],
-            completed_at=datetime.fromisoformat(data["completed_at"])
-            if data["completed_at"]
-            else None,
-            deadline=datetime.fromisoformat(data["deadline"])
-            if data["deadline"] is not None
-            else None,
+            completed_at=_to_date(data["completed_at"]) if data["completed_at"] else None,
+            deadline=_to_date(data["deadline"]) if data["deadline"] is not None else None,
         )
 
     def _get_dict_from_task(self, task: Task) -> dict:
@@ -41,18 +57,18 @@ class JSONStorage:
         data_dict["deadline"] = task.deadline.isoformat() if task.deadline is not None else None
         return data_dict
 
-    def load(self, filename: str = "tasks.json") -> None:
+    def load(self, filename: str | Path | None = None) -> None:
         """
         Load tasks from the JSON storage file if it exists
         After loading, remove tasks completed longer ago than auto_remove_days
         """
-        task_file = Path(filename)
+        task_file = Path(filename) if filename is not None else default_tasks_file()
         if not task_file.exists():
-            self.filename = Path(filename)
+            self.filename = task_file
             return
         else:
             data = json.loads(task_file.read_text())
-            self.filename = Path(filename)
+            self.filename = task_file
             self.next_id = data["next_id"]
             self.version = data["version"]
             self.tasks = [self._get_task_from_dict(task) for task in data["tasks"]]
@@ -61,7 +77,7 @@ class JSONStorage:
                 labels = {item["label"]: item["count"] for item in labels}
             self.labels = labels
 
-            today = datetime.now(ZoneInfo("Europe/Amsterdam"))
+            today = date.today()
             for task in self.tasks[:]:
                 if (
                     task.completed
@@ -78,6 +94,7 @@ class JSONStorage:
             "labels": self.labels,
             "tasks": [self._get_dict_from_task(task) for task in self.tasks],
         }
+        self.filename.parent.mkdir(parents=True, exist_ok=True)
         json_tmp = self.filename.with_suffix(".tmp")
         json_tmp.write_text(json.dumps(data, indent=2))
         os.replace(json_tmp, self.filename)
@@ -154,7 +171,7 @@ class JSONStorage:
 
         return False
 
-    def add_deadline(self, task_id: int, deadline: datetime) -> bool:
+    def add_deadline(self, task_id: int, deadline: date) -> bool:
         """
         Add a deadline to a task with task_id and return True
         If the task does not exist, return False
